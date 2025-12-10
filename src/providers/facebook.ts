@@ -1,4 +1,8 @@
-import type { OAuthTokens, OAuthProfile, ProviderBase } from "../provider/types";
+import type {
+  OAuthTokens,
+  OAuthProfile,
+  ProviderBase,
+} from "../provider/types";
 
 export default {
   name: "facebook",
