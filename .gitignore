@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+
+# Build
+dist/
+
+
+# Test
+test/
+
+# OS
+.DS_Store
+Thumbs.db
