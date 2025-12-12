@@ -1,39 +1,35 @@
-import type {
-  OAuthTokens,
-  OAuthProfile,
-  ProviderBase,
-} from "../provider/types";
+import { ProviderConfig } from "../types";
 
 export default {
-  name: "discord",
   authorizationUrl: "https://discord.com/api/oauth2/authorize",
   tokenUrl: "https://discord.com/api/oauth2/token",
-  scopes: ["identify", "email"] as const,
+  scopes: ["identify", "email"],
 
-  normalizeProfile(rawProfile: unknown): OAuthProfile {
+  normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
+    
     return {
       id: String(profile.id),
       email: profile.email as string | undefined,
       name: profile.username as string | undefined,
-      username: profile.username as string | undefined,
-      picture: profile.avatar as string | undefined,
+      picture: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : undefined,
       provider: "discord",
       raw: profile,
     };
   },
 
-  normalizeTokens(rawTokens: unknown): OAuthTokens {
+  normalizeTokens(rawTokens: unknown) {
     const tokens = rawTokens as Record<string, unknown>;
     return {
       accessToken: tokens.access_token as string,
+      refreshToken: tokens.refresh_token as string | undefined,
       tokenType: tokens.token_type as string | undefined,
       expiresIn: tokens.expires_in as number | undefined,
       raw: tokens,
     };
   },
 
-  async fetchProfile(accessToken: string): Promise<unknown> {
+  async fetchProfile(accessToken: string) {
     const response = await fetch("https://discord.com/api/users/@me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -47,4 +43,4 @@ export default {
 
     return response.json();
   },
-} as ProviderBase;
+} as Omit<ProviderConfig, "clientId" | "clientSecret">;

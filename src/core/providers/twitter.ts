@@ -1,39 +1,37 @@
-import type {
-  OAuthTokens,
-  OAuthProfile,
-  ProviderBase,
-} from "../provider/types";
+import { ProviderConfig } from "../types";
 
 export default {
-  name: "twitter",
   authorizationUrl: "https://twitter.com/i/oauth2/authorize",
   tokenUrl: "https://twitter.com/2/oauth2/token",
-  scopes: ["tweet.read", "users.read"] as const,
+  scopes: ["tweet.read", "users.read"],
 
-  normalizeProfile(rawProfile: unknown): OAuthProfile {
+  normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
+    const data = profile.data as Record<string, unknown> | undefined;
+    
     return {
-      id: String(profile.id),
-      name: profile.name as string | undefined,
-      username: profile.username as string | undefined,
-      picture: undefined,
+      id: String(data?.id),
+      email: undefined,
+      name: data?.name as string | undefined,
+      picture: data?.profile_image_url as string | undefined,
       provider: "twitter",
       raw: profile,
     };
   },
 
-  normalizeTokens(rawTokens: unknown): OAuthTokens {
+  normalizeTokens(rawTokens: unknown) {
     const tokens = rawTokens as Record<string, unknown>;
     return {
       accessToken: tokens.access_token as string,
+      refreshToken: tokens.refresh_token as string | undefined,
       tokenType: tokens.token_type as string | undefined,
       expiresIn: tokens.expires_in as number | undefined,
       raw: tokens,
     };
   },
 
-  async fetchProfile(accessToken: string): Promise<unknown> {
-    const response = await fetch("https://api.twitter.com/2/users/me", {
+  async fetchProfile(accessToken: string) {
+    const response = await fetch("https://api.twitter.com/2/users/me?user.fields=id,name,profile_image_url", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -46,4 +44,4 @@ export default {
 
     return response.json();
   },
-} as ProviderBase;
+} as Omit<ProviderConfig, "clientId" | "clientSecret">;

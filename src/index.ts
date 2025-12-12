@@ -1,1 +1,1 @@
-export { NextOAuth } from "./auth";
+export { createAuth } from "./core";

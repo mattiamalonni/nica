@@ -1,16 +1,11 @@
-import type {
-  OAuthTokens,
-  OAuthProfile,
-  ProviderBase,
-} from "../provider/types";
+import { ProviderConfig } from "../types";
 
 export default {
-  name: "google",
   authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
-  scopes: ["openid", "email", "profile"] as const,
+  scopes: ["openid", "email", "profile"],
 
-  normalizeProfile(rawProfile: unknown): OAuthProfile {
+  normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
     return {
       id: String(profile.sub),
@@ -22,7 +17,7 @@ export default {
     };
   },
 
-  normalizeTokens(rawTokens: unknown): OAuthTokens {
+  normalizeTokens(rawTokens: unknown) {
     const tokens = rawTokens as Record<string, unknown>;
     return {
       accessToken: tokens.access_token as string,
@@ -37,16 +32,13 @@ export default {
    * Google fornisce i dati utente tramite l'endpoint userinfo
    * che ritorna direttamente i claim del token JWT
    */
-  async fetchProfile(accessToken: string): Promise<unknown> {
-    const response = await fetch(
-      "https://openidconnect.googleapis.com/v1/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/json",
-        },
+  async fetchProfile(accessToken: string) {
+    const response = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
       },
-    );
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch Google user: ${response.statusText}`);
@@ -54,4 +46,4 @@ export default {
 
     return response.json();
   },
-} as ProviderBase;
+} as Omit<ProviderConfig, "clientId" | "clientSecret">;

@@ -1,29 +1,26 @@
-import type {
-  OAuthTokens,
-  OAuthProfile,
-  ProviderBase,
-} from "../provider/types";
+import { ProviderConfig } from "../types";
 
 export default {
-  name: "twitch",
   authorizationUrl: "https://id.twitch.tv/oauth2/authorize",
   tokenUrl: "https://id.twitch.tv/oauth2/token",
-  scopes: ["user:read:email"] as const,
+  scopes: ["user:read:email"],
 
-  normalizeProfile(rawProfile: unknown): OAuthProfile {
+  normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
+    const data = profile.data as Record<string, unknown>[] | undefined;
+    const user = data?.[0] as Record<string, unknown> | undefined;
+    
     return {
-      id: String(profile.id),
-      email: profile.email as string | undefined,
-      name: profile.display_name as string | undefined,
-      username: profile.login as string | undefined,
-      picture: profile.profile_image_url as string | undefined,
+      id: String(user?.id),
+      email: user?.email as string | undefined,
+      name: user?.display_name as string | undefined,
+      picture: user?.profile_image_url as string | undefined,
       provider: "twitch",
       raw: profile,
     };
   },
 
-  normalizeTokens(rawTokens: unknown): OAuthTokens {
+  normalizeTokens(rawTokens: unknown) {
     const tokens = rawTokens as Record<string, unknown>;
     return {
       accessToken: tokens.access_token as string,
@@ -34,11 +31,11 @@ export default {
     };
   },
 
-  async fetchProfile(accessToken: string): Promise<unknown> {
+  async fetchProfile(accessToken: string) {
     const response = await fetch("https://api.twitch.tv/helix/users", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-ID": "",
+        "Client-ID": "", // Should be provided at runtime
         Accept: "application/json",
       },
     });
@@ -47,7 +44,6 @@ export default {
       throw new Error(`Failed to fetch Twitch user: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    return data.data?.[0];
+    return response.json();
   },
-} as ProviderBase;
+} as Omit<ProviderConfig, "clientId" | "clientSecret">;

@@ -1,18 +1,13 @@
-import type {
-  OAuthTokens,
-  OAuthProfile,
-  ProviderBase,
-} from "../provider/types";
+import { ProviderConfig } from "../types";
 
 export default {
-  name: "microsoft",
-  authorizationUrl:
-    "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+  authorizationUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
   tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-  scopes: ["openid", "email", "profile"] as const,
+  scopes: ["openid", "profile", "email"],
 
-  normalizeProfile(rawProfile: unknown): OAuthProfile {
+  normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
+    
     return {
       id: String(profile.id),
       email: profile.userPrincipalName as string | undefined,
@@ -23,7 +18,7 @@ export default {
     };
   },
 
-  normalizeTokens(rawTokens: unknown): OAuthTokens {
+  normalizeTokens(rawTokens: unknown) {
     const tokens = rawTokens as Record<string, unknown>;
     return {
       accessToken: tokens.access_token as string,
@@ -34,7 +29,7 @@ export default {
     };
   },
 
-  async fetchProfile(accessToken: string): Promise<unknown> {
+  async fetchProfile(accessToken: string) {
     const response = await fetch("https://graph.microsoft.com/v1.0/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -48,4 +43,4 @@ export default {
 
     return response.json();
   },
-} as ProviderBase;
+} as Omit<ProviderConfig, "clientId" | "clientSecret">;

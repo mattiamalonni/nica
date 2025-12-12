@@ -1,16 +1,11 @@
-import type {
-  OAuthTokens,
-  OAuthProfile,
-  ProviderBase,
-} from "../provider/types";
+import { ProviderConfig } from "../types";
 
 export default {
-  name: "github",
   authorizationUrl: "https://github.com/login/oauth/authorize",
   tokenUrl: "https://github.com/login/oauth/access_token",
-  scopes: ["user:email"] as const,
+  scopes: ["user:email"],
 
-  normalizeProfile(rawProfile: unknown): OAuthProfile {
+  normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
     return {
       id: String(profile.id),
@@ -23,10 +18,11 @@ export default {
     };
   },
 
-  normalizeTokens(rawTokens: unknown): OAuthTokens {
+  normalizeTokens(rawTokens: unknown) {
     const tokens = rawTokens as Record<string, unknown>;
     return {
       accessToken: tokens.access_token as string,
+      refreshToken: tokens.refresh_token as string | undefined,
       tokenType: tokens.token_type as string | undefined,
       expiresIn: tokens.expires_in as number | undefined,
       raw: tokens,
@@ -37,7 +33,7 @@ export default {
    * GitHub fornisce le email verificate tramite un endpoint separato
    * Se non c'è una email primaria nel profilo, cerca tra le email verificate
    */
-  async fetchProfile(accessToken: string): Promise<unknown> {
+  async fetchProfile(accessToken: string) {
     // Fetcha il profilo utente
     const userResponse = await fetch("https://api.github.com/user", {
       headers: {
@@ -47,9 +43,7 @@ export default {
     });
 
     if (!userResponse.ok) {
-      throw new Error(
-        `Failed to fetch GitHub user: ${userResponse.statusText}`,
-      );
+      throw new Error(`Failed to fetch GitHub user: ${userResponse.statusText}`);
     }
 
     const user = await userResponse.json();
@@ -57,15 +51,12 @@ export default {
     // Se non c'è una email pubblica, fetcha le email verificate
     if (!user.email) {
       try {
-        const emailsResponse = await fetch(
-          "https://api.github.com/user/emails",
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              Accept: "application/vnd.github.v3+json",
-            },
+        const emailsResponse = await fetch("https://api.github.com/user/emails", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: "application/vnd.github.v3+json",
           },
-        );
+        });
 
         if (emailsResponse.ok) {
           const emails = await emailsResponse.json();
@@ -87,4 +78,4 @@ export default {
 
     return user;
   },
-} as ProviderBase;
+} as Omit<ProviderConfig, "clientId" | "clientSecret">;
