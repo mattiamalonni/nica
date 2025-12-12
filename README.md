@@ -1,17 +1,17 @@
-# Next OAuth
+# nica
 
 A minimal, unopinionated OAuth2 authentication library. Provides a composable API for handling OAuth flows with built-in support for multiple providers. Fully typed with TypeScript for complete type safety across your authentication flow.
 
 ## Installation
 
 ```bash
-npm install next-oauth
+npm install nica
 ```
 
 ## Quick Start
 
 ```typescript
-import { createAuth } from "next-oauth";
+import { createAuth } from "nica";
 
 const auth = createAuth({
   providers: {
