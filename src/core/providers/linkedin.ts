@@ -11,7 +11,7 @@ export default {
     const localizedLastName = profile.localizedLastName as string | undefined;
     const profilePicture = profile.profilePicture as Record<string, unknown> | undefined;
     const dpDisplayUrl = profilePicture?.displayImage as string | undefined;
-    
+
     return {
       id: String(profile.id),
       email: profile.email as string | undefined,

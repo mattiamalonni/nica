@@ -7,7 +7,7 @@ export default {
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    
+
     return {
       id: String(profile.id),
       email: profile.userPrincipalName as string | undefined,

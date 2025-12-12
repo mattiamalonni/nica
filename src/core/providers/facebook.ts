@@ -9,7 +9,7 @@ export default {
     const profile = rawProfile as Record<string, unknown>;
     const picture = profile.picture as Record<string, unknown> | undefined;
     const pictureData = picture?.data as Record<string, unknown> | undefined;
-    
+
     return {
       id: String(profile.id),
       email: profile.email as string | undefined,
