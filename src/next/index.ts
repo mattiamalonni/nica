@@ -1,4 +1,5 @@
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
+import type { NextRequest, NextResponse } from "next/server";
 
 export type SessionConfig = {
   secret: string;
@@ -20,8 +21,8 @@ export type SessionPayload = Record<string, unknown> & {
 };
 
 export type SessionContext = {
-  request?: Request;
-  response?: any;
+  request?: NextRequest;
+  response?: NextResponse;
 };
 
 type AuthInstance<T> = {
@@ -72,22 +73,18 @@ async function encryptData(data: string, secret: string): Promise<string> {
 }
 
 async function decryptData(token: string, secret: string): Promise<string | null> {
-  try {
-    const combined = Uint8Array.from(atob(token), (c) => c.charCodeAt(0));
+  const combined = Uint8Array.from(atob(token), (c) => c.charCodeAt(0));
 
-    const salt = combined.slice(0, 16);
-    const iv = combined.slice(16, 32);
-    const encrypted = combined.slice(32);
+  const salt = combined.slice(0, 16);
+  const iv = combined.slice(16, 32);
+  const encrypted = combined.slice(32);
 
-    const key = await hashSecret(secret, salt);
-    const cryptoKey = await crypto.subtle.importKey("raw", key.buffer as ArrayBuffer, { name: "AES-GCM" }, false, ["decrypt"]);
+  const key = await hashSecret(secret, salt);
+  const cryptoKey = await crypto.subtle.importKey("raw", key.buffer as ArrayBuffer, { name: "AES-GCM" }, false, ["decrypt"]);
 
-    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, encrypted);
+  const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, encrypted);
 
-    return decoder.decode(decrypted);
-  } catch {
-    return null;
-  }
+  return decoder.decode(decrypted);
 }
 
 // HMAC signing for "signed" strategy
@@ -101,19 +98,15 @@ async function signData(data: string, secret: string): Promise<string> {
 }
 
 async function verifySignedData(token: string, secret: string): Promise<string | null> {
-  try {
-    const [data, signature] = token.split(".");
-    if (!data || !signature) return null;
+  const [data, signature] = token.split(".");
+  if (!data || !signature) return null;
 
-    const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
 
-    const signatureBuf = Uint8Array.from(atob(signature), (c) => c.charCodeAt(0));
-    const isValid = await crypto.subtle.verify("HMAC", key, signatureBuf, encoder.encode(data));
+  const signatureBuf = Uint8Array.from(atob(signature), (c) => c.charCodeAt(0));
+  const isValid = await crypto.subtle.verify("HMAC", key, signatureBuf, encoder.encode(data));
 
-    return isValid ? data : null;
-  } catch {
-    return null;
-  }
+  return isValid ? data : null;
 }
 
 export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: SessionConfig): AuthWithSession<T> {
@@ -192,20 +185,16 @@ export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: Ses
 
     if (!jsonStr) return null;
 
-    try {
-      const payload = JSON.parse(jsonStr) as SessionPayload;
+    const payload = JSON.parse(jsonStr) as SessionPayload;
 
-      if (validateExp && payload.exp) {
-        const now = Math.floor(Date.now() / 1000);
-        if (payload.exp < now) {
-          return null;
-        }
+    if (validateExp && payload.exp) {
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp < now) {
+        return null;
       }
-
-      return payload;
-    } catch {
-      return null;
     }
+
+    return payload;
   };
 
   const setSessionCookie = async (token: string, context?: SessionContext) => {
@@ -231,19 +220,15 @@ export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: Ses
 
   const getSessionCookie = async (context?: SessionContext): Promise<string | undefined> => {
     if (context?.request) {
-      try {
-        const headersList = context.request.headers;
-        const cookieHeader = headersList.get("cookie");
-        if (cookieHeader) {
-          const cookieList = cookieHeader.split(";").map((c) => c.trim());
-          const sessionCookie = cookieList.find((c) => c.startsWith(`${config.cookie.name}=`));
-          if (sessionCookie) {
-            const parts = sessionCookie.split("=");
-            return parts.length > 1 ? parts[1] : undefined;
-          }
+      const headersList = context.request.headers;
+      const cookieHeader = headersList.get("cookie");
+      if (cookieHeader) {
+        const cookieList = cookieHeader.split(";").map((c) => c.trim());
+        const sessionCookie = cookieList.find((c) => c.startsWith(`${config.cookie.name}=`));
+        if (sessionCookie) {
+          const parts = sessionCookie.split("=");
+          return parts.length > 1 ? parts[1] : undefined;
         }
-      } catch {
-        // Silently fail and fall back to next method
       }
     }
 
