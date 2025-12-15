@@ -121,10 +121,7 @@ const authWithSession = withSession(auth, {
 
 ```typescript
 // In a route handler or server action
-const token = await authWithSession.session.create(
-  { userId: user.id, email: user.email },
-  { response }
-);
+const token = await authWithSession.session.create({ userId: user.id, email: user.email }, { response });
 ```
 
 **Get current session:**
