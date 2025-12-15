@@ -23,7 +23,11 @@
   "dependencies": {
     "next": "^15.0.0"
   },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
   "devDependencies": {
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "@types/react": "^18.0.0"
   }
 }

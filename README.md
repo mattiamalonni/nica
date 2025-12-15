@@ -1,6 +1,16 @@
 # nica
 
-A minimal, unopinionated OAuth2 authentication library. Provides a composable API for handling OAuth flows with built-in support for multiple providers. Fully typed with TypeScript for complete type safety across your authentication flow.
+A minimal, unopinionated OAuth2 authentication library for Next.js. Provides a composable API for handling OAuth flows with built-in support for multiple providers and session management. Fully typed with TypeScript for complete type safety across your authentication flow.
+
+## Features
+
+- **Unopinionated**: Sensible defaults, highly customizable
+- **Composable**: Three-layer architecture: `createAuth` → `withSession` → `withReact`
+- **Type-safe**: Full TypeScript support with provider inference
+- **Next.js native**: Built for Next.js 15+ with client/server directives
+- **Encrypted sessions**: AES-GCM encryption + HMAC-SHA256 signing, no external crypto dependencies
+- **Multiple providers**: 9 built-in OAuth providers
+- **React hooks**: `useSession()` and `useAuth()` for client-side integration
 
 ## Installation
 
@@ -12,6 +22,7 @@ npm install nica
 
 ```typescript
 import { createAuth } from "nica";
+import { withSession, withReact } from "nica/next";
 
 const auth = createAuth({
   providers: {
@@ -23,15 +34,17 @@ const auth = createAuth({
   origin: "https://myapp.com",
   onProfile: async ({ tokens, profile, provider }) => {
     // Handle authenticated user (e.g., save to database)
-    // const user = await db.user.upsert({
-    //   where: { id: profile.id },
-    //   update: { lastLoginAt: new Date() },
-    //   create: { providerName: provider, providerId: profile.id, name: profile.name, email: profile.email },
-    // });
-    // return { userId: user.id };
     return { userId: profile.id };
   },
 });
+
+// Add session management
+const authWithSession = withSession(auth, {
+  secret: process.env.SESSION_SECRET!,
+});
+
+// Create React hooks
+export const { useSession, useAuth } = withReact(authWithSession);
 ```
 
 ## Usage Examples
@@ -96,8 +109,7 @@ export async function GET(req: Request, { params }: { params: { provider: string
 For managing user sessions in Next.js, use the `withSession` module:
 
 ```typescript
-import { createAuth, withSession } from "nica";
-import type { SessionConfig } from "nica/next";
+import { createAuth, withSession } from "nica/next";
 
 const auth = createAuth({
   // ... configuration
@@ -161,6 +173,70 @@ await authWithSession.session.destroy({ response });
 - `cookie.secure`: `true`
 - `cookie.sameSite`: `"lax"`
 - `cookie.path`: `"/"`
+
+### React Hooks (Next.js Client)
+
+Use the `withReact` module to create React hooks for client-side session and auth management:
+
+```typescript
+// lib/auth.ts - 'use server'
+import { createAuth, withSession, withReact } from "nica/next";
+
+const auth = createAuth({
+  // ... configuration
+});
+
+const authWithSession = withSession(auth, {
+  secret: process.env.SESSION_SECRET!,
+});
+
+export const { useSession, useAuth } = withReact(authWithSession);
+```
+
+**Using `useSession()` hook:**
+
+```typescript
+'use client';
+
+import { useSession } from '@/lib/auth';
+
+export function Profile() {
+  const { session, loading, error } = useSession();
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!session) return <div>Not authenticated</div>;
+
+  return <div>Welcome {session.userId}</div>;
+}
+```
+
+**Using `useAuth()` hook:**
+
+```typescript
+'use client';
+
+import { useAuth } from '@/lib/auth';
+
+export function LoginButton() {
+  const { signIn, signOut } = useAuth();
+
+  return (
+    <div>
+      <button onClick={() => signIn('github')}>Sign in with GitHub</button>
+      <button onClick={() => signOut()}>Sign out</button>
+      <button onClick={() => signOut({ redirectTo: '/login' })}>Sign out (custom redirect)</button>
+    </div>
+  );
+}
+```
+
+The `useAuth()` hook provides:
+
+- `signIn(provider)` - Redirects to the OAuth provider
+- `signOut(options)` - Destroys the session and redirects (supports optional `redirectTo` parameter)
+
+All available providers are type-checked, so you'll get autocomplete for the provider name.
 
 ### Express Integration
 

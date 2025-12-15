@@ -66,8 +66,6 @@ export function createAuth<T = void>({ providers, origin, onProfile }: CreateAut
     };
   }
 
-  const listProviders = () => Object.keys(p) as (keyof typeof PROVIDERS)[];
-
   const getProvider = (name: keyof typeof PROVIDERS) => {
     const provider = p[name];
     if (!provider) throw new Error(`Provider not configured: ${name}`);
@@ -90,5 +88,5 @@ export function createAuth<T = void>({ providers, origin, onProfile }: CreateAut
     return undefined as T extends void ? void : T;
   };
 
-  return { listProviders, getAuthUrl, handleCallback };
+  return { providers: Object.keys(p), getAuthUrl, handleCallback };
 }
