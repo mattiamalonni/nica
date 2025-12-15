@@ -91,6 +91,80 @@ export async function GET(req: Request, { params }: { params: { provider: string
 }
 ```
 
+### Session Management (Next.js)
+
+For managing user sessions in Next.js, use the `withSession` module:
+
+```typescript
+import { createAuth, withSession } from "nica";
+import type { SessionConfig } from "nica/next";
+
+const auth = createAuth({
+  // ... configuration
+});
+
+const authWithSession = withSession(auth, {
+  secret: process.env.SESSION_SECRET!,
+  strategy: "encrypted", // or "signed"
+  tokenExp: 1000 * 60 * 30, // 30 minutes
+  cookie: {
+    name: "session",
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  },
+});
+```
+
+**Create a session:**
+
+```typescript
+// In a route handler or server action
+const token = await authWithSession.session.create(
+  { userId: user.id, email: user.email },
+  { response }
+);
+```
+
+**Get current session:**
+
+```typescript
+// In a server component or route handler
+const session = await authWithSession.session.get();
+if (!session) {
+  // User not authenticated
+}
+```
+
+**Peek at session (without validation):**
+
+```typescript
+// Check if session exists and get expiration info
+const sessionData = await authWithSession.session.peek();
+if (sessionData?.exp) {
+  const expiresAt = new Date(sessionData.exp * 1000);
+}
+```
+
+**Destroy session:**
+
+```typescript
+// Logout user
+await authWithSession.session.destroy({ response });
+```
+
+**Session configuration defaults:**
+
+- `strategy`: `"encrypted"` (uses AES-GCM)
+- `tokenExp`: `7 days`
+- `cookie.name`: `"nica_auth"`
+- `cookie.maxAge`: `7 days`
+- `cookie.httpOnly`: `true`
+- `cookie.secure`: `true`
+- `cookie.sameSite`: `"lax"`
+- `cookie.path`: `"/"`
+
 ### Express Integration
 
 **Redirect to login:**
