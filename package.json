@@ -1,6 +1,6 @@
 {
   "name": "nica",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "A minimal, unopinionated OAuth2 authentication library for Next.js",
   "repository": "https://github.com/mattiamalonni/nica",

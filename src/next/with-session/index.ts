@@ -15,7 +15,7 @@ export type SessionConfig = {
   };
 };
 
-export type SessionPayload = Record<string, unknown> & {
+export type SessionPayload<T = object> = T & {
   iat?: number;
   exp?: number;
 };
@@ -28,9 +28,9 @@ export type SessionContext = {
 type AuthInstance<T> = ReturnType<typeof import("../../core").createAuth<T>>;
 
 type SessionMethods<T> = {
-  create: (data: SessionPayload, context?: SessionContext) => Promise<string>;
-  get: (context?: SessionContext) => Promise<SessionPayload | undefined>;
-  peek: (context?: SessionContext) => Promise<(SessionPayload & { iat: number; exp: number }) | undefined>;
+  create: (data: SessionPayload<T>, context?: SessionContext) => Promise<string>;
+  get: (context?: SessionContext) => Promise<SessionPayload<T> | undefined>;
+  peek: (context?: SessionContext) => Promise<(SessionPayload<T> & { iat: number; exp: number }) | undefined>;
   destroy: (context?: SessionContext) => Promise<void>;
 };
 
@@ -144,9 +144,9 @@ export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: Ses
     },
   };
 
-  const encodeToken = async (payload: SessionPayload): Promise<string> => {
+  const encodeToken = async (payload: SessionPayload<T>): Promise<string> => {
     const now = Math.floor(Date.now() / 1000);
-    const tokenData: SessionPayload = {
+    const tokenData: SessionPayload<T> = {
       ...payload,
       iat: now,
       exp: now + Math.floor(config.tokenExp / 1000),
@@ -161,7 +161,7 @@ export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: Ses
     }
   };
 
-  const decodeToken = async (token: string, validateExp: boolean): Promise<SessionPayload | null> => {
+  const decodeToken = async (token: string, validateExp: boolean): Promise<SessionPayload<T> | null> => {
     let jsonStr: string | null = null;
 
     if (config.strategy === "encrypted") {
@@ -175,7 +175,7 @@ export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: Ses
 
     if (!jsonStr) return null;
 
-    const payload = JSON.parse(jsonStr) as SessionPayload;
+    const payload = JSON.parse(jsonStr) as SessionPayload<T>;
 
     if (validateExp && payload.exp) {
       const now = Math.floor(Date.now() / 1000);
@@ -238,27 +238,27 @@ export function withSession<T = void>(oauth: AuthInstance<T>, sessionConfig: Ses
   return {
     ...oauth,
     session: {
-      create: async (data: SessionPayload, context?: SessionContext): Promise<string> => {
+      create: async (data: SessionPayload<T>, context?: SessionContext): Promise<string> => {
         const token = await encodeToken(data);
         await setSessionCookie(token, context);
         return token;
       },
 
-      get: async (context?: SessionContext): Promise<SessionPayload | undefined> => {
+      get: async (context?: SessionContext): Promise<SessionPayload<T> | undefined> => {
         const token = await getSessionCookie(context);
         if (!token) return undefined;
 
         return (await decodeToken(token, true)) || undefined;
       },
 
-      peek: async (context?: SessionContext): Promise<(SessionPayload & { iat: number; exp: number }) | undefined> => {
+      peek: async (context?: SessionContext): Promise<(SessionPayload<T> & { iat: number; exp: number }) | undefined> => {
         const token = await getSessionCookie(context);
         if (!token) return undefined;
 
         const payload = await decodeToken(token, false);
         if (!payload) return undefined;
 
-        return payload as SessionPayload & { iat: number; exp: number };
+        return payload as SessionPayload<T> & { iat: number; exp: number };
       },
 
       destroy: async (context?: SessionContext): Promise<void> => {
