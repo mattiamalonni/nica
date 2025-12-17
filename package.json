@@ -1,6 +1,6 @@
 {
   "name": "nica",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "A minimal, unopinionated OAuth2 authentication library for Next.js",
   "repository": "https://github.com/mattiamalonni/nica",
@@ -22,14 +22,13 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "next": "^15.0.0"
-  },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
+    "next": "^16",
+    "react": "^19"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
-    "@types/react": "^18.0.0"
+    "next": "^16",
+    "typescript": "^5",
+    "@types/react": "^19"
   }
 }
