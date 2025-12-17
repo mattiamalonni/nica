@@ -8,6 +8,8 @@ export function createAuth<T = void>({ providers, origin, onProfile }: CreateAut
   for (const [name, config] of Object.entries(providers)) {
     const providerName = name as keyof typeof PROVIDERS;
 
+    if (!onProfile) throw new Error("onProfile callback is required");
+
     const PROVIDER = PROVIDERS[name as keyof typeof PROVIDERS];
     if (!PROVIDER) throw new Error(`Unsupported provider: ${name}`);
 
@@ -77,15 +79,11 @@ export function createAuth<T = void>({ providers, origin, onProfile }: CreateAut
     return provider.getAuthUrl!();
   };
 
-  const handleCallback = async (providerName: string, code: string): Promise<T extends void ? void : T> => {
+  const handleCallback = async (providerName: string, code: string): Promise<Awaited<ReturnType<typeof onProfile>>> => {
     const provider = getProvider(providerName as keyof typeof PROVIDERS);
     const { tokens, profile } = await provider.handleCallback!(code);
 
-    if (onProfile && profile) {
-      const data = await onProfile({ tokens, profile, provider: providerName as SupportedProviderName });
-      return data as T extends void ? void : T;
-    }
-    return undefined as T extends void ? void : T;
+    return await onProfile({ tokens, profile, provider: providerName as SupportedProviderName });
   };
 
   return { providers: Object.keys(p), getAuthUrl, handleCallback };

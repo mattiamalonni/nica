@@ -63,5 +63,5 @@ export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider:
 export type CreateAuthParams<T> = {
   providers: ProviderSchema;
   origin?: string;
-  onProfile?: (data: AuthCallback) => Promise<T>;
+  onProfile: (data: AuthCallback) => Promise<T>;
 };
