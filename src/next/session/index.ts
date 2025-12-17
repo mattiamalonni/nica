@@ -33,7 +33,7 @@ export type SessionPayload<T extends object = {}> = T & SessionMeta;
 
 export type SessionMethods<T extends object> = {
   create: (data: T, context?: SessionContext) => Promise<string>;
-  get: (context?: SessionContext) => Promise<T | undefined>;
+  get: (context?: SessionContext) => Promise<SessionPayload<T> | undefined>;
   peek: (context?: SessionContext) => Promise<SessionPayload<T> | undefined>;
   destroy: (context?: SessionContext) => Promise<void>;
 };
@@ -215,22 +215,24 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
       return token;
     },
 
-    get: async (context?: SessionContext): Promise<T | undefined> => {
+    get: async (context?: SessionContext): Promise<SessionPayload<T> | undefined> => {
       const token = await getCookie(context);
       if (!token) return undefined;
 
       const payload = await decodeToken(token, true);
       if (!payload) return undefined;
 
-      const { iat, exp, ...data } = payload;
-      return data as T;
+      return payload;
     },
 
     peek: async (context?: SessionContext): Promise<SessionPayload<T> | undefined> => {
       const token = await getCookie(context);
       if (!token) return undefined;
 
-      return (await decodeToken(token, false)) ?? undefined;
+      const payload = await decodeToken(token, false);
+      if (!payload) return undefined;
+
+      return payload;
     },
 
     destroy: async (context?: SessionContext): Promise<void> => {
