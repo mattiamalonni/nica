@@ -1,14 +1,14 @@
 "use client";
 
-import { createContext, ReactNode, useContext } from "react";
-import type { SessionMethods } from "../next/session";
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import type { SessionMethods, SessionPayload } from "../next/session";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
 /* -------------------------------------------------------------------------- */
 
 export type UseSessionReturn<T extends object> = {
-  session: T | undefined;
+  session: SessionPayload<T> | undefined;
   loading: boolean;
   error: Error | null;
 };
@@ -25,9 +25,8 @@ const SessionContext = createContext<SessionContextType<any>>(undefined);
 /*                                 Provider                                   */
 /* -------------------------------------------------------------------------- */
 
-export interface SessionProviderProps<T extends object> {
+export interface SessionProviderProps<T extends object> extends PropsWithChildren {
   session: SessionMethods<T>;
-  children: ReactNode;
 }
 
 export function SessionProvider<T extends object = {}>({ session, children }: SessionProviderProps<T>) {
@@ -39,17 +38,39 @@ export function SessionProvider<T extends object = {}>({ session, children }: Se
 /* -------------------------------------------------------------------------- */
 
 export function useSession<T extends object = {}>(): UseSessionReturn<T> {
-  const session = useContext(SessionContext) as SessionMethods<T> | undefined;
+  const sessionMethods = useContext(SessionContext) as SessionMethods<T> | undefined;
 
-  if (!session) {
+  if (!sessionMethods) {
     throw new Error("useSession must be used within a SessionProvider");
   }
 
-  // Return the session methods directly - the component using this hook
-  // will need to call session.get() when needed
-  return {
-    session: undefined,
-    loading: false,
-    error: null,
-  };
+  const [session, setSession] = useState<SessionPayload<T> | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchSession = async () => {
+      setError(null);
+      try {
+        const data = await sessionMethods.get();
+        if (mounted) setSession(data);
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [sessionMethods]);
+
+  return { session, loading, error };
 }
