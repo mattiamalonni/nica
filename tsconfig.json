@@ -9,9 +9,8 @@
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
