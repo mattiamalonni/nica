@@ -175,14 +175,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
 
   const getCookie = async (context?: SessionContext): Promise<string | undefined> => {
     if (context?.request) {
-      const header = context.request.headers.get("cookie");
-      if (header) {
-        const found = header
-          .split(";")
-          .map((c) => c.trim())
-          .find((c) => c.startsWith(`${config.cookie.name}=`));
-        return found?.split("=")[1];
-      }
+      return context.request.cookies.get(config.cookie.name)?.value;
     }
     const { cookies } = await import("next/headers");
     const store = await cookies();
