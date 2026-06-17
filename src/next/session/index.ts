@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
 
 /* -------------------------------------------------------------------------- */
@@ -168,6 +167,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
     if (context?.response) {
       context.response.cookies.set(config.cookie.name, token, config.cookie);
     } else {
+      const { cookies } = await import("next/headers");
       const store = await cookies();
       store.set(config.cookie.name, token, config.cookie as any);
     }
@@ -184,7 +184,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
         return found?.split("=")[1];
       }
     }
-
+    const { cookies } = await import("next/headers");
     const store = await cookies();
     return store.get(config.cookie.name)?.value;
   };
@@ -193,6 +193,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
     if (context?.response) {
       context.response.cookies.delete(config.cookie.name);
     } else {
+      const { cookies } = await import("next/headers");
       const store = await cookies();
       store.delete(config.cookie.name);
     }
