@@ -1,4 +1,4 @@
-import type { AuthCallback, CreateAuthParams } from "nica";
+import type { AuthCallback, CreateAuthParams, SupportedProviderName } from "nica";
 import { nica } from "nica";
 import type { SessionConfig, SessionContext } from "../session";
 import { createSession } from "../session";
@@ -13,9 +13,9 @@ export function nicaNext<T extends object>({ providers, session: sessionConfig, 
   const auth = nica({ providers });
   const session = createSession<T>(sessionConfig);
 
-  const getRedirectUrl = (provider: string) => auth.getRedirectUrl(provider);
+  const getRedirectUrl = (provider: SupportedProviderName) => auth.getRedirectUrl(provider);
 
-  const authenticate = async (provider: string, code: string, context?: SessionContext): Promise<T> => {
+  const authenticate = async (provider: SupportedProviderName, code: string, context?: SessionContext): Promise<T> => {
     const data = await auth.authenticate(provider, code);
     const sessionData = await onProfile(data);
     await session.create(sessionData, context);
