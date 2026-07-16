@@ -28,8 +28,15 @@ jobs:
       - name: Sync version from root
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          npm pkg set version="$VERSION" --workspace=packages/nica
-          npm pkg set version="$VERSION" --workspace=packages/nica-next
+          AUTHOR=$(node -p "require('./package.json').author")
+          LICENSE=$(node -p "require('./package.json').license")
+          npm pkg set version="$VERSION" author="$AUTHOR" license="$LICENSE" --workspace=packages/nica
+          npm pkg set version="$VERSION" author="$AUTHOR" license="$LICENSE" --workspace=packages/nica-next
+
+      - name: Copy README to packages
+        run: |
+          cp README.md packages/nica/README.md
+          cp README.md packages/nica-next/README.md
 
       - name: Build nica
         run: npm run build --workspace=packages/nica

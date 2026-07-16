@@ -29,12 +29,7 @@ export default {
     };
   },
 
-  /**
-   * GitHub fornisce le email verificate tramite un endpoint separato
-   * Se non c'è una email primaria nel profilo, cerca tra le email verificate
-   */
   async fetchProfile(accessToken: string) {
-    // Fetcha il profilo utente
     const userResponse = await fetch("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -48,7 +43,6 @@ export default {
 
     const user = await userResponse.json();
 
-    // Se non c'è una email pubblica, fetcha le email verificate
     if (!user.email) {
       try {
         const emailsResponse = await fetch("https://api.github.com/user/emails", {
@@ -60,7 +54,6 @@ export default {
 
         if (emailsResponse.ok) {
           const emails = await emailsResponse.json();
-          // Trova la email primaria e verificata
           const primaryEmail = emails.find((e: unknown) => {
             const email = e as Record<string, unknown>;
             return email.primary === true && email.verified === true;
@@ -71,7 +64,6 @@ export default {
           }
         }
       } catch (error) {
-        // Se fallisce il fetching delle email, continua con quello che abbiamo
         console.warn("Failed to fetch GitHub emails:", error);
       }
     }

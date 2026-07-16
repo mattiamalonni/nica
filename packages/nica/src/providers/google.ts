@@ -28,10 +28,6 @@ export default {
     };
   },
 
-  /**
-   * Google fornisce i dati utente tramite l'endpoint userinfo
-   * che ritorna direttamente i claim del token JWT
-   */
   async fetchProfile(accessToken: string) {
     const response = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
       headers: {

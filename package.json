@@ -1,12 +1,12 @@
 {
   "name": "nica",
-  "version": "0.3.1",
-  "private": true,
+  "version": "0.3.2",
+  "author": "Mattia Malonni",
+  "license": "MIT",
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
     "typescript": "^5"
   }
-
 }
