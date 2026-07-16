@@ -1,0 +1,31 @@
+{
+  "name": "nica-next",
+  "type": "module",
+  "description": "Next.js adapter for nica — session management and React hooks",
+  "repository": "https://github.com/mattiamalonni/nica",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "nica": "*"
+  },
+  "peerDependencies": {
+    "next": "^16",
+    "react": "^19"
+  },
+  "devDependencies": {
+    "next": "^16",
+    "@types/react": "^19"
+  }
+}

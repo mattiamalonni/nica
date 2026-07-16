@@ -1,21 +1,18 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://id.twitch.tv/oauth2/authorize",
-  tokenUrl: "https://id.twitch.tv/oauth2/token",
-  scopes: ["user:read:email"],
+  authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  tokenUrl: "https://oauth2.googleapis.com/token",
+  scopes: ["openid", "email", "profile"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    const data = profile.data as Record<string, unknown>[] | undefined;
-    const user = data?.[0] as Record<string, unknown> | undefined;
-
     return {
-      id: String(user?.id),
-      email: user?.email as string | undefined,
-      name: user?.display_name as string | undefined,
-      picture: user?.profile_image_url as string | undefined,
-      provider: "twitch",
+      id: String(profile.sub),
+      email: profile.email as string | undefined,
+      name: profile.name as string | undefined,
+      picture: profile.picture as string | undefined,
+      provider: "google",
       raw: profile,
     };
   },
@@ -31,19 +28,22 @@ export default {
     };
   },
 
+  /**
+   * Google fornisce i dati utente tramite l'endpoint userinfo
+   * che ritorna direttamente i claim del token JWT
+   */
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://api.twitch.tv/helix/users", {
+    const response = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-ID": "", // Should be provided at runtime
         Accept: "application/json",
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Twitch user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Google user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

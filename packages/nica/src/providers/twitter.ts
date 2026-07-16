@@ -1,21 +1,20 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://slack.com/oauth/v2/authorize",
-  tokenUrl: "https://slack.com/api/oauth.v2.access",
-  scopes: ["users:read", "users:read.email"],
+  authorizationUrl: "https://twitter.com/i/oauth2/authorize",
+  tokenUrl: "https://twitter.com/2/oauth2/token",
+  scopes: ["tweet.read", "users.read"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    const user = profile.user as Record<string, unknown> | undefined;
-    const profile_pic = user?.profile as Record<string, unknown> | undefined;
+    const data = profile.data as Record<string, unknown> | undefined;
 
     return {
-      id: String(user?.id),
-      email: user?.email as string | undefined,
-      name: user?.real_name as string | undefined,
-      picture: profile_pic?.image_512 as string | undefined,
-      provider: "slack",
+      id: String(data?.id),
+      email: undefined,
+      name: data?.name as string | undefined,
+      picture: data?.profile_image_url as string | undefined,
+      provider: "twitter",
       raw: profile,
     };
   },
@@ -32,7 +31,7 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://slack.com/api/users.identity", {
+    const response = await fetch("https://api.twitter.com/2/users/me?user.fields=id,name,profile_image_url", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -40,9 +39,9 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Slack user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Twitter user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

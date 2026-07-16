@@ -78,4 +78,4 @@ export default {
 
     return user;
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

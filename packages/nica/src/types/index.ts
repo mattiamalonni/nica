@@ -8,7 +8,7 @@ type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyo
 export type ProviderConfig = {
   clientId: string;
   clientSecret: string;
-  redirectUri?: string;
+  redirectUri: string;
   scopes?: string[];
 
   authorizationUrl?: string;
@@ -60,8 +60,6 @@ export interface AuthTokens {
 
 export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider: SupportedProviderName };
 
-export type CreateAuthParams<T> = {
+export type CreateAuthParams = {
   providers: ProviderSchema;
-  origin?: string;
-  onProfile: (data: AuthCallback) => Promise<T>;
 };

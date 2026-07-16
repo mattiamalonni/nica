@@ -1,6 +1,4 @@
-import { SupportedProviderName, AuthCallback, ProviderConfig } from "../types";
-
-export const getDefaultRedirectUri = (providerName: SupportedProviderName) => `/api/auth/${providerName}/callback`;
+import { AuthCallback, ProviderConfig } from "../types";
 
 export const createExchangeCodeForTokensFunction =
   ({ tokenUrl, clientId, clientSecret, redirectUri }: Pick<Required<ProviderConfig>, "tokenUrl" | "clientId" | "clientSecret" | "redirectUri">) =>

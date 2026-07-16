@@ -1,19 +1,21 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://discord.com/api/oauth2/authorize",
-  tokenUrl: "https://discord.com/api/oauth2/token",
-  scopes: ["identify", "email"],
+  authorizationUrl: "https://id.twitch.tv/oauth2/authorize",
+  tokenUrl: "https://id.twitch.tv/oauth2/token",
+  scopes: ["user:read:email"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
+    const data = profile.data as Record<string, unknown>[] | undefined;
+    const user = data?.[0] as Record<string, unknown> | undefined;
 
     return {
-      id: String(profile.id),
-      email: profile.email as string | undefined,
-      name: profile.username as string | undefined,
-      picture: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : undefined,
-      provider: "discord",
+      id: String(user?.id),
+      email: user?.email as string | undefined,
+      name: user?.display_name as string | undefined,
+      picture: user?.profile_image_url as string | undefined,
+      provider: "twitch",
       raw: profile,
     };
   },
@@ -30,17 +32,18 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://discord.com/api/users/@me", {
+    const response = await fetch("https://api.twitch.tv/helix/users", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        "Client-ID": "", // Should be provided at runtime
         Accept: "application/json",
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Discord user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Twitch user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

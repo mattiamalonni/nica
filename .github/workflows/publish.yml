@@ -25,8 +25,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Sync version from root
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          npm pkg set version="$VERSION" --workspace=packages/nica
+          npm pkg set version="$VERSION" --workspace=packages/nica-next
 
-      - name: Publish to npm
+      - name: Build nica
+        run: npm run build --workspace=packages/nica
+
+      - name: Publish nica
         run: npm publish --provenance --access public
+        working-directory: packages/nica
+
+      - name: Build nica-next
+        run: npm run build --workspace=packages/nica-next
+
+      - name: Publish nica-next
+        run: npm publish --provenance --access public
+        working-directory: packages/nica-next

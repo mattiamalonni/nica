@@ -1,21 +1,19 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://www.facebook.com/v18.0/dialog/oauth",
-  tokenUrl: "https://graph.facebook.com/v18.0/oauth/access_token",
-  scopes: ["email", "public_profile"],
+  authorizationUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+  tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+  scopes: ["openid", "profile", "email"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    const picture = profile.picture as Record<string, unknown> | undefined;
-    const pictureData = picture?.data as Record<string, unknown> | undefined;
 
     return {
       id: String(profile.id),
-      email: profile.email as string | undefined,
-      name: profile.name as string | undefined,
-      picture: pictureData?.url as string | undefined,
-      provider: "facebook",
+      email: profile.userPrincipalName as string | undefined,
+      name: profile.displayName as string | undefined,
+      picture: undefined,
+      provider: "microsoft",
       raw: profile,
     };
   },
@@ -32,7 +30,7 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://graph.facebook.com/me?fields=id,email,name,picture", {
+    const response = await fetch("https://graph.microsoft.com/v1.0/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -40,9 +38,9 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Facebook user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Microsoft user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

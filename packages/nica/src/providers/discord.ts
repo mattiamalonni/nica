@@ -1,19 +1,19 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-  tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-  scopes: ["openid", "profile", "email"],
+  authorizationUrl: "https://discord.com/api/oauth2/authorize",
+  tokenUrl: "https://discord.com/api/oauth2/token",
+  scopes: ["identify", "email"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
 
     return {
       id: String(profile.id),
-      email: profile.userPrincipalName as string | undefined,
-      name: profile.displayName as string | undefined,
-      picture: undefined,
-      provider: "microsoft",
+      email: profile.email as string | undefined,
+      name: profile.username as string | undefined,
+      picture: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : undefined,
+      provider: "discord",
       raw: profile,
     };
   },
@@ -30,7 +30,7 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://graph.microsoft.com/v1.0/me", {
+    const response = await fetch("https://discord.com/api/users/@me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -38,9 +38,9 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Microsoft user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Discord user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

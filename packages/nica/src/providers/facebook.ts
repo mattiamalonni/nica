@@ -1,20 +1,21 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://twitter.com/i/oauth2/authorize",
-  tokenUrl: "https://twitter.com/2/oauth2/token",
-  scopes: ["tweet.read", "users.read"],
+  authorizationUrl: "https://www.facebook.com/v18.0/dialog/oauth",
+  tokenUrl: "https://graph.facebook.com/v18.0/oauth/access_token",
+  scopes: ["email", "public_profile"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    const data = profile.data as Record<string, unknown> | undefined;
+    const picture = profile.picture as Record<string, unknown> | undefined;
+    const pictureData = picture?.data as Record<string, unknown> | undefined;
 
     return {
-      id: String(data?.id),
-      email: undefined,
-      name: data?.name as string | undefined,
-      picture: data?.profile_image_url as string | undefined,
-      provider: "twitter",
+      id: String(profile.id),
+      email: profile.email as string | undefined,
+      name: profile.name as string | undefined,
+      picture: pictureData?.url as string | undefined,
+      provider: "facebook",
       raw: profile,
     };
   },
@@ -31,7 +32,7 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://api.twitter.com/2/users/me?user.fields=id,name,profile_image_url", {
+    const response = await fetch("https://graph.facebook.com/me?fields=id,email,name,picture", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -39,9 +40,9 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Twitter user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Facebook user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

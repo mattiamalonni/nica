@@ -1,18 +1,21 @@
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenUrl: "https://oauth2.googleapis.com/token",
-  scopes: ["openid", "email", "profile"],
+  authorizationUrl: "https://slack.com/oauth/v2/authorize",
+  tokenUrl: "https://slack.com/api/oauth.v2.access",
+  scopes: ["users:read", "users:read.email"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
+    const user = profile.user as Record<string, unknown> | undefined;
+    const profile_pic = user?.profile as Record<string, unknown> | undefined;
+
     return {
-      id: String(profile.sub),
-      email: profile.email as string | undefined,
-      name: profile.name as string | undefined,
-      picture: profile.picture as string | undefined,
-      provider: "google",
+      id: String(user?.id),
+      email: user?.email as string | undefined,
+      name: user?.real_name as string | undefined,
+      picture: profile_pic?.image_512 as string | undefined,
+      provider: "slack",
       raw: profile,
     };
   },
@@ -28,12 +31,8 @@ export default {
     };
   },
 
-  /**
-   * Google fornisce i dati utente tramite l'endpoint userinfo
-   * che ritorna direttamente i claim del token JWT
-   */
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+    const response = await fetch("https://slack.com/api/users.identity", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -41,9 +40,9 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Google user: ${response.statusText}`);
+      throw new Error(`Failed to fetch Slack user: ${response.statusText}`);
     }
 
     return response.json();
   },
-} as Omit<ProviderConfig, "clientId" | "clientSecret">;
+} as Omit<ProviderConfig, "clientId" | "clientSecret" | "redirectUri">;

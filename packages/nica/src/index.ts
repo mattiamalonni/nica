@@ -1,14 +1,14 @@
-import { createExchangeCodeForTokensFunction, createGetAuthUrlFunction, createHandleCallbackFunction, getDefaultRedirectUri } from "./defaults";
-import { PROVIDERS } from "./providers";
-import { CreateAuthParams, ProviderSchema, SupportedProviderName } from "./types";
+export type { AuthCallback, AuthProfile, AuthTokens, CreateAuthParams, SupportedProviderName } from "./types";
 
-export function createAuth<T = void>({ providers, origin, onProfile }: CreateAuthParams<T>) {
+import { createExchangeCodeForTokensFunction, createGetAuthUrlFunction, createHandleCallbackFunction } from "./defaults";
+import { PROVIDERS } from "./providers";
+import { AuthCallback, CreateAuthParams, ProviderSchema, SupportedProviderName } from "./types";
+
+export function nica({ providers }: CreateAuthParams) {
   const p: Partial<ProviderSchema> = {};
 
   for (const [name, config] of Object.entries(providers)) {
     const providerName = name as keyof typeof PROVIDERS;
-
-    if (!onProfile) throw new Error("onProfile callback is required");
 
     const PROVIDER = PROVIDERS[name as keyof typeof PROVIDERS];
     if (!PROVIDER) throw new Error(`Unsupported provider: ${name}`);
@@ -18,9 +18,7 @@ export function createAuth<T = void>({ providers, origin, onProfile }: CreateAut
 
     if (!clientId || !clientSecret) throw new Error(`Missing clientId or clientSecret for provider: ${name}`);
 
-    const baseRedirectUri = getDefaultRedirectUri(name as keyof typeof PROVIDERS);
-    const redirectUri = config.redirectUri || (origin ? `${origin}${baseRedirectUri}` : baseRedirectUri);
-    if (!redirectUri) throw new Error(`Missing redirectUri for provider: ${name}`);
+    const redirectUri = config.redirectUri;
 
     const scopes = config.scopes || PROVIDER.scopes;
     if (!scopes) throw new Error(`Missing scopes for provider: ${name}`);
@@ -74,17 +72,18 @@ export function createAuth<T = void>({ providers, origin, onProfile }: CreateAut
     return provider;
   };
 
-  const getAuthUrl = (providerName: string): string => {
-    const provider = getProvider(providerName as keyof typeof PROVIDERS);
+  const generateAuthUrl = (providerName: keyof typeof PROVIDERS): string => {
+    const provider = getProvider(providerName);
     return provider.getAuthUrl!();
   };
 
-  const handleCallback = async (providerName: string, code: string): Promise<Awaited<ReturnType<typeof onProfile>>> => {
-    const provider = getProvider(providerName as keyof typeof PROVIDERS);
+  const authenticate = async (providerName: keyof typeof PROVIDERS, code: string): Promise<AuthCallback> => {
+    const provider = getProvider(providerName);
     const { tokens, profile } = await provider.handleCallback!(code);
-
-    return await onProfile({ tokens, profile, provider: providerName as SupportedProviderName });
+    return { tokens, profile, provider: providerName as SupportedProviderName };
   };
 
-  return { providers: Object.keys(p), getAuthUrl, handleCallback };
+  return { providers: Object.keys(p), getRedirectUrl: generateAuthUrl, authenticate };
 }
+
+export default nica;
