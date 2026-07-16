@@ -33,14 +33,11 @@ jobs:
 
       - name: Build nica
         run: npm run build --workspace=packages/nica
-
-      - name: Publish nica
-        run: npm publish --provenance --access public
-        working-directory: packages/nica
-
       - name: Build nica-next
         run: npm run build --workspace=packages/nica-next
-
       - name: Publish nica-next
         run: npm publish --provenance --access public
         working-directory: packages/nica-next
+      - name: Publish nica
+        run: npm publish --provenance --access public
+        working-directory: packages/nica
