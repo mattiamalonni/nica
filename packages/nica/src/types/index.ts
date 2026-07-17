@@ -14,7 +14,7 @@ export type ProviderConfig = {
   authorizationUrl?: string;
   tokenUrl?: string;
 
-  exchangeCodeForTokens?: (code: string) => Promise<unknown>;
+  exchangeCodeForTokens?: (code: string, codeVerifier?: string) => Promise<unknown>;
 
   normalizeProfile?: (rawProfile: unknown) => {
     id: string;
@@ -34,8 +34,8 @@ export type ProviderConfig = {
   };
 
   fetchProfile?: (accessToken: string) => Promise<unknown>;
-  getAuthUrl?: () => string;
-  handleCallback?: (code: string) => Promise<AuthCallback>;
+  getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
+  handleCallback?: (code: string, codeVerifier?: string) => Promise<AuthCallback>;
 };
 
 export type ProviderSchema = RequireAtLeastOne<Record<SupportedProviderName, ProviderConfig>>;
@@ -62,4 +62,9 @@ export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider:
 
 export type CreateAuthParams = {
   providers: ProviderSchema;
+};
+
+export type SessionPayload<T extends object = Record<string, unknown>> = T & {
+  iat: number;
+  exp: number;
 };

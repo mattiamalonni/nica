@@ -15,8 +15,8 @@ export function nicaNext<T extends object>({ providers, session: sessionConfig, 
 
   const getRedirectUrl = (provider: SupportedProviderName) => auth.getRedirectUrl(provider);
 
-  const authenticate = async (provider: SupportedProviderName, code: string, context?: SessionContext): Promise<T> => {
-    const data = await auth.authenticate(provider, code);
+  const authenticate = async (provider: SupportedProviderName, code: string, codeVerifier?: string, context?: SessionContext): Promise<T> => {
+    const data = await auth.authenticate(provider, code, codeVerifier);
     const sessionData = await onProfile(data);
     await session.create(sessionData, context);
     return sessionData;

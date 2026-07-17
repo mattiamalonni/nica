@@ -7,16 +7,12 @@ export default {
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    const localizedFirstName = profile.localizedFirstName as string | undefined;
-    const localizedLastName = profile.localizedLastName as string | undefined;
-    const profilePicture = profile.profilePicture as Record<string, unknown> | undefined;
-    const dpDisplayUrl = profilePicture?.displayImage as string | undefined;
 
     return {
-      id: String(profile.id),
+      id: String(profile.sub),
       email: profile.email as string | undefined,
-      name: [localizedFirstName, localizedLastName].filter(Boolean).join(" ") || undefined,
-      picture: dpDisplayUrl,
+      name: profile.name as string | undefined,
+      picture: profile.picture as string | undefined,
       provider: "linkedin",
       raw: profile,
     };
@@ -34,7 +30,7 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage))", {
+    const response = await fetch("https://api.linkedin.com/v2/userinfo", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",

@@ -1,4 +1,5 @@
 import type { NextRequest, NextResponse } from "next/server";
+import type { SessionPayload } from "nica";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
@@ -28,13 +29,6 @@ export type SessionContext = {
   request?: NextRequest;
   response?: NextResponse;
 };
-
-type SessionMeta = {
-  iat: number;
-  exp: number;
-};
-
-export type SessionPayload<T extends object = {}> = T & SessionMeta;
 
 export type SessionMethods<T extends object> = {
   create: (data: T, context?: SessionContext) => Promise<string>;

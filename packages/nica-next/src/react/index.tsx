@@ -1,8 +1,11 @@
+import type { SessionPayload } from "nica-react";
+import { SessionContextProvider, createUseSession } from "nica-react";
 import type { ReactNode } from "react";
-import type { SessionMethods, SessionPayload } from "../session";
-import { SessionContextProvider, createUseSession } from "./context";
+import type { SessionMethods } from "../session";
 
-export function withReactSession<T extends object>(session: SessionMethods<T>) {
+export * from "nica-react";
+
+export function withServerSession<T extends object>(session: SessionMethods<T>) {
   const useSession = createUseSession<T>();
 
   async function SessionProvider({ children }: { children: ReactNode }) {
@@ -12,7 +15,7 @@ export function withReactSession<T extends object>(session: SessionMethods<T>) {
     } catch {
       data = undefined;
     }
-    return <SessionContextProvider value={data as SessionPayload<Record<string, unknown>> | undefined}>{children}</SessionContextProvider>;
+    return <SessionContextProvider value={{ data: data as SessionPayload<Record<string, unknown>> | undefined, isLoading: false }}>{children}</SessionContextProvider>;
   }
 
   return { SessionProvider, useSession };

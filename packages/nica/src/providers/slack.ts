@@ -3,18 +3,16 @@ import { ProviderConfig } from "../types";
 export default {
   authorizationUrl: "https://slack.com/oauth/v2/authorize",
   tokenUrl: "https://slack.com/api/oauth.v2.access",
-  scopes: ["users:read", "users:read.email"],
+  scopes: ["openid", "profile", "email"],
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;
-    const user = profile.user as Record<string, unknown> | undefined;
-    const profile_pic = user?.profile as Record<string, unknown> | undefined;
 
     return {
-      id: String(user?.id),
-      email: user?.email as string | undefined,
-      name: user?.real_name as string | undefined,
-      picture: profile_pic?.image_512 as string | undefined,
+      id: String(profile.sub),
+      email: profile.email as string | undefined,
+      name: profile.name as string | undefined,
+      picture: profile.picture as string | undefined,
       provider: "slack",
       raw: profile,
     };
@@ -32,7 +30,7 @@ export default {
   },
 
   async fetchProfile(accessToken: string) {
-    const response = await fetch("https://slack.com/api/users.identity", {
+    const response = await fetch("https://slack.com/openid/connect/userinfo", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",

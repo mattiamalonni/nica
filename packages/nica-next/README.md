@@ -65,10 +65,12 @@ if (!session) redirect("/login");
 **React session — setup (once in your auth config):**
 
 ```typescript
-import { withReactSession } from "nica-next/react";
+import { withServerSession } from "nica-next/react";
 
-export const { SessionProvider, useSession } = withReactSession(auth.session);
+export const { SessionProvider, useSession } = withServerSession(auth.session);
 ```
+
+> `nica-next/react` also re-exports everything from [`nica-react`](../nica-react) — `withReactSession`, `SessionContextProvider`, `createUseSession`, and `SessionPayload`.
 
 **Wrap your root layout with `SessionProvider`** — `app/layout.tsx`:
 
