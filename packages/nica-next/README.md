@@ -11,7 +11,7 @@ npm install nica-next
 ## Usage
 
 ```typescript
-import { nicaNext } from "nica-next";
+import { nicaNext } from "nica-next/server";
 
 const auth = nicaNext({
   providers: {
@@ -69,12 +69,12 @@ if (!session) redirect("/login");
 **React session — setup (once in your auth config):**
 
 ```typescript
-import { withServerSession } from "nica-next/react";
+import { withServerSession } from "nica-next/server";
 
 export const { SessionProvider, useSession } = withServerSession(auth.session);
 ```
 
-> `nica-next/react` also re-exports everything from [`nica-react`](../nica-react) — `withReactSession`, `SessionContextProvider`, `createUseSession`, and `SessionPayload`.
+> `nica-next/client` re-exports everything from [`nica-react`](../nica-react) — `withReactSession`, `SessionContextProvider`, `createUseSession`, and `SessionPayload`.
 
 **Wrap your root layout with `SessionProvider`** — `app/layout.tsx`:
 
