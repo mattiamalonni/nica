@@ -34,8 +34,12 @@ jobs:
           npm pkg set version="$VERSION" author="$AUTHOR" license="$LICENSE" --workspace=packages/nica-react
           npm pkg set version="$VERSION" author="$AUTHOR" license="$LICENSE" --workspace=packages/nica-next
 
-      - name: Build all
-        run: npm run build
+      - name: Build nica
+        run: npm run build --workspace=packages/nica
+      - name: Build nica-react
+        run: npm run build --workspace=packages/nica-react
+      - name: Build nica-next
+        run: npm run build --workspace=packages/nica-next
       - name: Publish nica
         run: npm publish --provenance --access public
         working-directory: packages/nica

@@ -6,9 +6,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "scripts": {
-    "build": "npm run build --workspaces"
-  },
   "devDependencies": {
     "typescript": "^5"
   }
