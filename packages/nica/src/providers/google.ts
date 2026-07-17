@@ -1,3 +1,4 @@
+import { NicaError, NicaErrorCode } from "../errors";
 import { ProviderConfig } from "../types";
 
 export default {
@@ -37,7 +38,7 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Google user: ${response.statusText}`);
+      throw new NicaError(`Failed to fetch Google user: ${response.statusText}`, { code: NicaErrorCode.PROVIDER_FETCH_FAILED, provider: "google" });
     }
 
     return response.json();

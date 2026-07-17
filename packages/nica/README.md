@@ -63,6 +63,41 @@ nica({
 });
 ```
 
+## Error Handling
+
+All errors thrown by nica are instances of `NicaError`, which extends the native `Error` with two extra fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `code` | `NicaErrorCode` | Machine-readable slug identifying the error |
+| `provider` | `SupportedProviderName \| undefined` | Provider involved, if applicable |
+| `cause` | `unknown` | Underlying cause (ES2022 native `Error.cause`) |
+
+```typescript
+import { NicaError, NicaErrorCode } from "nica";
+
+try {
+  const { tokens, profile } = await auth.authenticate("github", code, codeVerifier);
+} catch (err) {
+  if (err instanceof NicaError) {
+    console.error(err.code);     // e.g. "PROVIDER_FETCH_FAILED"
+    console.error(err.provider); // e.g. "github"
+    console.error(err.cause);    // underlying error, if any
+  }
+}
+```
+
+### Error codes
+
+| Code | When thrown |
+|------|-------------|
+| `UNSUPPORTED_PROVIDER` | Unknown provider name passed to `nica()` |
+| `PROVIDER_NOT_CONFIGURED` | `authenticate()` / `getRedirectUrl()` called for a provider not passed to `nica()` |
+| `INVALID_PROVIDER_CONFIG` | Required config field missing for a provider |
+| `PROVIDER_FETCH_FAILED` | HTTP error while fetching user profile from provider |
+| `TOKEN_EXCHANGE_FAILED` | HTTP error while exchanging authorization code for tokens |
+| `INVALID_SESSION_CONFIG` | Invalid session config (via `nica-next`) |
+
 ## Security
 
 `getRedirectUrl()` automatically generates a cryptographically random `state` parameter (CSRF protection) and a PKCE `code_verifier`/`code_challenge` pair (RFC 7636). You are responsible for persisting `state` and `codeVerifier` between the redirect and the callback (e.g. via short-lived cookies), and for verifying that the `state` received in the callback matches the one you stored.

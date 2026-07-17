@@ -1,3 +1,4 @@
+import { NicaError, NicaErrorCode } from "../errors";
 import { AuthCallback, ProviderConfig } from "../types";
 
 /* -------------------------------------------------------------------------- */
@@ -48,7 +49,7 @@ export const createExchangeCodeForTokensFunction =
       body: new URLSearchParams(body).toString(),
     });
 
-    if (!response.ok) throw new Error(`Failed to exchange code for tokens: ${response.statusText}`);
+    if (!response.ok) throw new NicaError(`Failed to exchange code for tokens: ${response.statusText}`, { code: NicaErrorCode.TOKEN_EXCHANGE_FAILED });
 
     return response.json();
   };

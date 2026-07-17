@@ -1,5 +1,6 @@
 import type { NextRequest, NextResponse } from "next/server";
 import type { SessionPayload } from "nica";
+import { NicaError, NicaErrorCode } from "nica";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
@@ -118,11 +119,11 @@ async function verifySignedData(token: string, secret: string): Promise<string |
 
 export function createSession<T extends object = {}>(sessionConfig: SessionConfig): SessionMethods<T> {
   if (!sessionConfig?.secret) {
-    throw new Error("Session secret is required");
+    throw new NicaError("Session secret is required", { code: NicaErrorCode.INVALID_SESSION_CONFIG });
   }
 
   if (sessionConfig.secret.length < 32) {
-    throw new Error("Session secret must be at least 32 characters long");
+    throw new NicaError("Session secret must be at least 32 characters long", { code: NicaErrorCode.INVALID_SESSION_CONFIG });
   }
 
   const config = {
