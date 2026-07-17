@@ -2,7 +2,7 @@ import { ProviderConfig } from "../types";
 
 export default {
   authorizationUrl: "https://twitter.com/i/oauth2/authorize",
-  tokenUrl: "https://twitter.com/2/oauth2/token",
+  tokenUrl: "https://api.twitter.com/2/oauth2/token",
   scopes: ["tweet.read", "users.read"],
 
   normalizeProfile(rawProfile: unknown) {

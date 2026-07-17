@@ -58,7 +58,7 @@ Creates a `SessionProvider` component and a `useSession` hook bound to a shared 
 
 ### `useSession()`
 
-Returns `{ session: SessionPayload<T> | undefined }`. Must be called inside a `<SessionProvider>`. Throws if used outside one.
+Returns `{ session: SessionPayload<T> | undefined; isLoading: boolean }`. Must be called inside a `<SessionProvider>`. Throws if used outside one.
 
 ### `SessionContextProvider`
 

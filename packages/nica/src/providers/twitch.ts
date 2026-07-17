@@ -31,11 +31,11 @@ export default {
     };
   },
 
-  async fetchProfile(accessToken: string) {
+  async fetchProfile(accessToken: string, clientId?: string) {
     const response = await fetch("https://api.twitch.tv/helix/users", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-ID": "", // Should be provided at runtime
+        "Client-ID": clientId ?? "",
         Accept: "application/json",
       },
     });

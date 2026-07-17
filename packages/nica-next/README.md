@@ -35,14 +35,18 @@ const auth = nicaNext({
 **Redirect route** — `app/api/auth/[provider]/route.ts`:
 
 ```typescript
+import type { SupportedProviderName } from "nica";
+
 export async function GET(_req: Request, { params }: { params: { provider: string } }) {
-  return Response.redirect(auth.generateAuthUrl(params.provider));
+  const { url } = await auth.getRedirectUrl(params.provider as SupportedProviderName);
+  return Response.redirect(url);
 }
 ```
 
 **Callback route** — `app/api/auth/[provider]/callback/route.ts`:
 
 ```typescript
+import type { SupportedProviderName } from "nica";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest, { params }: { params: { provider: string } }) {
@@ -50,7 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: { provider: st
   if (!code) return new Response("Missing code", { status: 400 });
 
   const res = NextResponse.redirect(new URL("/dashboard", req.url));
-  await auth.authenticate(params.provider, code, { response: res });
+  await auth.authenticate(params.provider as SupportedProviderName, code, undefined, { response: res });
   return res;
 }
 ```

@@ -48,7 +48,7 @@ export function nica({ providers }: CreateAuthParams) {
 
     const handleCallback =
       config.handleCallback ||
-      createHandleCallbackFunction({ providerName: name, exchangeCodeForTokens, normalizeTokens, fetchProfile, normalizeProfile });
+      createHandleCallbackFunction({ providerName: name, clientId, exchangeCodeForTokens, normalizeTokens, fetchProfile, normalizeProfile });
     if (!handleCallback) throw new Error(`Missing handleCallback for provider: ${name}`);
 
     p[providerName] = {

@@ -20,6 +20,7 @@ export type ProviderConfig = {
     id: string;
     email?: string;
     name?: string;
+    username?: string;
     picture?: string;
     provider: string;
     raw: Record<string, unknown>;
@@ -33,7 +34,7 @@ export type ProviderConfig = {
     raw: Record<string, unknown>;
   };
 
-  fetchProfile?: (accessToken: string) => Promise<unknown>;
+  fetchProfile?: (accessToken: string, clientId?: string) => Promise<unknown>;
   getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
   handleCallback?: (code: string, codeVerifier?: string) => Promise<AuthCallback>;
 };

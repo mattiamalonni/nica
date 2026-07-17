@@ -76,12 +76,14 @@ export const createGetAuthUrlFunction =
 export const createHandleCallbackFunction =
   ({
     providerName,
+    clientId,
     exchangeCodeForTokens,
     normalizeTokens,
     fetchProfile,
     normalizeProfile,
   }: {
     providerName: string;
+    clientId: string;
     exchangeCodeForTokens: Required<ProviderConfig>["exchangeCodeForTokens"];
     normalizeTokens: Required<ProviderConfig>["normalizeTokens"];
     fetchProfile: Required<ProviderConfig>["fetchProfile"];
@@ -91,7 +93,7 @@ export const createHandleCallbackFunction =
     const rawTokens = await exchangeCodeForTokens(code, codeVerifier);
     const tokens = normalizeTokens(rawTokens);
 
-    const rawProfile = await fetchProfile(tokens.accessToken);
+    const rawProfile = await fetchProfile(tokens.accessToken, clientId);
     const profile = normalizeProfile(rawProfile);
     return { tokens, profile, provider: providerName as any };
   };
