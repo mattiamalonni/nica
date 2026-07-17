@@ -22,7 +22,7 @@ export function useNica<T extends object>(fetchFn: () => Promise<SessionPayload<
           setData(undefined);
           setIsLoading(false);
         });
-    }, []);
+    }, [fetchFn]);
 
     return (
       <SessionContextProvider value={{ data: data as SessionPayload<Record<string, unknown>> | undefined, isLoading }}>

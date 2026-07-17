@@ -17,7 +17,7 @@ async function deriveKey(secret: string, salt: Uint8Array, usage: KeyUsage[]): P
 }
 
 export async function encryptData(data: string, secret: string): Promise<string> {
-  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
   const cryptoKey = await deriveKey(secret, salt, ["encrypt"]);
@@ -36,8 +36,8 @@ export async function decryptData(token: string, secret: string): Promise<string
     const combined = Uint8Array.from(atob(token), (c) => c.charCodeAt(0));
 
     const salt = combined.slice(0, 16);
-    const iv = combined.slice(16, 32);
-    const encrypted = combined.slice(32);
+    const iv = combined.slice(16, 28);
+    const encrypted = combined.slice(28);
 
     const cryptoKey = await deriveKey(secret, salt, ["decrypt"]);
     const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, encrypted);

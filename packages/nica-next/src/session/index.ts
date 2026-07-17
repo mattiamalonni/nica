@@ -102,7 +102,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
     } else {
       const { cookies } = await import("next/headers");
       const store = await cookies();
-      store.set(config.cookie.name, token, config.cookie as any);
+      store.set(config.cookie.name, token, config.cookie);
     }
   };
 

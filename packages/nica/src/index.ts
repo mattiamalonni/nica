@@ -6,8 +6,22 @@ import { NicaError, NicaErrorCode } from "./errors";
 import { PROVIDERS } from "./providers";
 import { AuthCallback, AuthTokens, CreateAuthParams, ProviderConfig } from "./types";
 
+type ResolvedProviderConfig = Required<Pick<ProviderConfig,
+  | "clientId"
+  | "clientSecret"
+  | "redirectUri"
+  | "scopes"
+  | "authorizationUrl"
+  | "tokenUrl"
+  | "normalizeProfile"
+  | "normalizeTokens"
+  | "exchangeCodeForTokens"
+  | "fetchProfile"
+  | "getAuthUrl"
+>>;
+
 export function nica({ providers }: CreateAuthParams) {
-  const p: Partial<Record<string, ProviderConfig>> = {};
+  const p: Partial<Record<string, ResolvedProviderConfig>> = {};
 
   for (const [name, config] of Object.entries(providers)) {
     const PROVIDER = PROVIDERS[name as keyof typeof PROVIDERS];
@@ -68,20 +82,20 @@ export function nica({ providers }: CreateAuthParams) {
 
   const getRedirectUrl = async (providerName: string): Promise<{ url: string; state: string; codeVerifier: string }> => {
     const provider = getProvider(providerName);
-    return provider.getAuthUrl!();
+    return provider.getAuthUrl();
   };
 
   const exchangeCode = async (providerName: string, code: string, codeVerifier?: string): Promise<AuthTokens> => {
     const provider = getProvider(providerName);
-    const rawTokens = await provider.exchangeCodeForTokens!(code, codeVerifier);
-    return provider.normalizeTokens!(rawTokens);
+    const rawTokens = await provider.exchangeCodeForTokens(code, codeVerifier);
+    return provider.normalizeTokens(rawTokens);
   };
 
   const authenticate = async (providerName: string, code: string, codeVerifier?: string): Promise<AuthCallback> => {
     const provider = getProvider(providerName);
     const tokens = await exchangeCode(providerName, code, codeVerifier);
-    const rawProfile = await provider.fetchProfile!(tokens.accessToken, provider.clientId);
-    const profile = provider.normalizeProfile!(rawProfile);
+    const rawProfile = await provider.fetchProfile(tokens.accessToken, provider.clientId);
+    const profile = provider.normalizeProfile(rawProfile);
     return { tokens, profile, provider: providerName };
   };
 
