@@ -1,10 +1,10 @@
 export { NicaError, NicaErrorCode } from "./errors";
 export type { AuthCallback, AuthProfile, AuthTokens, CreateAuthParams, SessionPayload, SupportedProviderName } from "./types";
 
-import { createExchangeCodeForTokensFunction, createGetAuthUrlFunction, createHandleCallbackFunction } from "./defaults";
+import { createExchangeCodeForTokensFunction, createGetAuthUrlFunction } from "./defaults";
 import { NicaError, NicaErrorCode } from "./errors";
 import { PROVIDERS } from "./providers";
-import { AuthCallback, CreateAuthParams, ProviderSchema, SupportedProviderName } from "./types";
+import { AuthCallback, AuthTokens, CreateAuthParams, ProviderSchema, SupportedProviderName } from "./types";
 
 export function nica({ providers }: CreateAuthParams) {
   const p: Partial<ProviderSchema> = {};
@@ -48,11 +48,6 @@ export function nica({ providers }: CreateAuthParams) {
     const getAuthUrl = config.getAuthUrl || createGetAuthUrlFunction({ authorizationUrl, clientId, redirectUri, scopes });
     if (!getAuthUrl) throw new NicaError(`Missing getAuthUrl for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name as SupportedProviderName });
 
-    const handleCallback =
-      config.handleCallback ||
-      createHandleCallbackFunction({ providerName: name, clientId, exchangeCodeForTokens, normalizeTokens, fetchProfile, normalizeProfile });
-    if (!handleCallback) throw new NicaError(`Missing handleCallback for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name as SupportedProviderName });
-
     p[providerName] = {
       clientId,
       clientSecret,
@@ -65,7 +60,6 @@ export function nica({ providers }: CreateAuthParams) {
       exchangeCodeForTokens,
       fetchProfile,
       getAuthUrl,
-      handleCallback,
     };
   }
 
@@ -80,13 +74,21 @@ export function nica({ providers }: CreateAuthParams) {
     return provider.getAuthUrl!();
   };
 
+  const exchangeCode = async (providerName: keyof typeof PROVIDERS, code: string, codeVerifier?: string): Promise<AuthTokens> => {
+    const provider = getProvider(providerName);
+    const rawTokens = await provider.exchangeCodeForTokens!(code, codeVerifier);
+    return provider.normalizeTokens!(rawTokens);
+  };
+
   const authenticate = async (providerName: keyof typeof PROVIDERS, code: string, codeVerifier?: string): Promise<AuthCallback> => {
     const provider = getProvider(providerName);
-    const { tokens, profile } = await provider.handleCallback!(code, codeVerifier);
+    const tokens = await exchangeCode(providerName, code, codeVerifier);
+    const rawProfile = await provider.fetchProfile!(tokens.accessToken, provider.clientId);
+    const profile = provider.normalizeProfile!(rawProfile);
     return { tokens, profile, provider: providerName as SupportedProviderName };
   };
 
-  return { providers: Object.keys(p), getRedirectUrl, authenticate };
+  return { providers: Object.keys(p), getRedirectUrl, exchangeCode, authenticate };
 }
 
 export default nica;

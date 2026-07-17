@@ -1,5 +1,5 @@
 import { NicaError, NicaErrorCode } from "../errors";
-import { AuthCallback, ProviderConfig } from "../types";
+import { ProviderConfig } from "../types";
 
 /* -------------------------------------------------------------------------- */
 /*                             PKCE / state helpers                           */
@@ -74,27 +74,3 @@ export const createGetAuthUrlFunction =
     return { url: `${authorizationUrl}?${params.toString()}`, state, codeVerifier };
   };
 
-export const createHandleCallbackFunction =
-  ({
-    providerName,
-    clientId,
-    exchangeCodeForTokens,
-    normalizeTokens,
-    fetchProfile,
-    normalizeProfile,
-  }: {
-    providerName: string;
-    clientId: string;
-    exchangeCodeForTokens: Required<ProviderConfig>["exchangeCodeForTokens"];
-    normalizeTokens: Required<ProviderConfig>["normalizeTokens"];
-    fetchProfile: Required<ProviderConfig>["fetchProfile"];
-    normalizeProfile: Required<ProviderConfig>["normalizeProfile"];
-  }) =>
-  async (code: string, codeVerifier?: string): Promise<AuthCallback> => {
-    const rawTokens = await exchangeCodeForTokens(code, codeVerifier);
-    const tokens = normalizeTokens(rawTokens);
-
-    const rawProfile = await fetchProfile(tokens.accessToken, clientId);
-    const profile = normalizeProfile(rawProfile);
-    return { tokens, profile, provider: providerName as any };
-  };

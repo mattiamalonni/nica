@@ -28,8 +28,10 @@ const { url, state, codeVerifier } = await auth.getRedirectUrl("github");
 // → save `state` and `codeVerifier` somewhere between this request and the callback
 //   (e.g. short-lived signed cookies)
 
-// 2. Handle the OAuth callback
-// → verify that the `state` query param matches what you saved
+// 2a. Exchange the code for tokens only (e.g. to save them or call extra provider APIs)
+const tokens = await auth.exchangeCode("github", code, codeVerifier);
+
+// 2b. Or exchange + fetch the user profile in one step
 const { tokens, profile, provider } = await auth.authenticate("github", code, codeVerifier);
 // → decide what to do: save to DB, create session, etc.
 ```
@@ -57,7 +59,6 @@ nica({
       normalizeProfile?: (raw: unknown) => AuthProfile;
       normalizeTokens?: (raw: unknown) => AuthTokens;
       getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
-      handleCallback?: (code: string, codeVerifier?: string) => Promise<AuthCallback>;
     },
   },
 });

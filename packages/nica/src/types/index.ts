@@ -36,7 +36,6 @@ export type ProviderConfig = {
 
   fetchProfile?: (accessToken: string, clientId?: string) => Promise<unknown>;
   getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
-  handleCallback?: (code: string, codeVerifier?: string) => Promise<AuthCallback>;
 };
 
 export type ProviderSchema = RequireAtLeastOne<Record<SupportedProviderName, ProviderConfig>>;
