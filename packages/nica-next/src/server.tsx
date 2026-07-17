@@ -1,23 +1,30 @@
-export { nicaNext } from "./auth";
+export type { CreateNextAuthParams } from "./auth";
 export { createSession } from "./session";
+export type { SessionConfig, SessionContext, SessionMethods } from "./session";
 
-import type { SessionPayload } from "nica-react";
+import type { SessionPayload } from "nica";
 import { SessionContextProvider, createUseSession } from "nica-react";
 import type { ReactNode } from "react";
-import type { SessionMethods } from "./session";
+import type { CreateNextAuthParams } from "./auth";
+import { createNicaNextCore } from "./auth";
 
-export function withServerSession<T extends object>(session: SessionMethods<T>) {
+export function nicaNext<T extends object>(params: CreateNextAuthParams<T>) {
+  const core = createNicaNextCore<T>(params);
   const useSession = createUseSession<T>();
 
   async function SessionProvider({ children }: { children: ReactNode }) {
     let data: SessionPayload<T> | undefined;
     try {
-      data = await session.get();
+      data = await core.session.get();
     } catch {
       data = undefined;
     }
-    return <SessionContextProvider value={{ data: data as SessionPayload<Record<string, unknown>> | undefined, isLoading: false }}>{children}</SessionContextProvider>;
+    return (
+      <SessionContextProvider value={{ data: data as SessionPayload<Record<string, unknown>> | undefined, isLoading: false }}>
+        {children}
+      </SessionContextProvider>
+    );
   }
 
-  return { SessionProvider, useSession };
+  return { ...core, SessionProvider, useSession };
 }

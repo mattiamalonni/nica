@@ -11,7 +11,7 @@ export default {
 
     return {
       id: String(profile.id),
-      email: profile.userPrincipalName as string | undefined,
+      email: (profile.mail ?? profile.userPrincipalName) as string | undefined,
       name: profile.displayName as string | undefined,
       picture: undefined,
       provider: "microsoft",

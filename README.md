@@ -86,22 +86,19 @@ const auth = nicaNext({
 **Redirect route** — `app/api/auth/[provider]/route.ts`:
 
 ```typescript
-export async function GET(_req: Request, { params }: { params: { provider: string } }) {
-  const { url } = await auth.getRedirectUrl(params.provider as SupportedProviderName);
-  return Response.redirect(url);
+export async function GET(_req: Request, { params }: { params: Promise<{ provider: string }> }) {
+  const { provider } = await params;
+  return auth.redirect(provider);
 }
 ```
 
 **Callback route** — `app/api/auth/[provider]/callback/route.ts`:
 
 ```typescript
-export async function GET(req: NextRequest, { params }: { params: { provider: string } }) {
-  const code = req.nextUrl.searchParams.get("code");
-  if (!code) return new Response("Missing code", { status: 400 });
-
-  const res = NextResponse.redirect(new URL("/dashboard", req.url));
-  await auth.authenticate(params.provider as SupportedProviderName, code, undefined, { response: res });
-  return res;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
+  const { provider } = await params;
+  const { response } = await auth.callback(req, provider);
+  return NextResponse.redirect(new URL("/dashboard", req.url), { headers: response.headers });
 }
 ```
 
@@ -116,8 +113,10 @@ if (!session) redirect("/login");
 
 ```typescript
 // lib/auth.ts
-import { withServerSession } from "nica-next/server";
-export const { SessionProvider, useSession } = withServerSession(auth.session);
+import { nicaNext } from "nica-next/server";
+
+export const auth = nicaNext({ ... });
+export const { SessionProvider, useSession } = auth;
 ```
 
 ```tsx

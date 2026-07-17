@@ -2,8 +2,8 @@ import { NicaError, NicaErrorCode } from "../errors";
 import { ProviderConfig } from "../types";
 
 export default {
-  authorizationUrl: "https://slack.com/oauth/v2/authorize",
-  tokenUrl: "https://slack.com/api/oauth.v2.access",
+  authorizationUrl: "https://slack.com/openid/connect/authorize",
+  tokenUrl: "https://slack.com/openid/connect/token",
   scopes: ["openid", "profile", "email"],
 
   normalizeProfile(rawProfile: unknown) {

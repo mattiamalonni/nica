@@ -35,27 +35,21 @@ const auth = nicaNext({
 **Redirect route** — `app/api/auth/[provider]/route.ts`:
 
 ```typescript
-import type { SupportedProviderName } from "nica";
-
-export async function GET(_req: Request, { params }: { params: { provider: string } }) {
-  const { url } = await auth.getRedirectUrl(params.provider as SupportedProviderName);
-  return Response.redirect(url);
+export async function GET(_req: Request, { params }: { params: Promise<{ provider: string }> }) {
+  const { provider } = await params;
+  return auth.redirect(provider);
 }
 ```
 
 **Callback route** — `app/api/auth/[provider]/callback/route.ts`:
 
 ```typescript
-import type { SupportedProviderName } from "nica";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { provider: string } }) {
-  const code = req.nextUrl.searchParams.get("code");
-  if (!code) return new Response("Missing code", { status: 400 });
-
-  const res = NextResponse.redirect(new URL("/dashboard", req.url));
-  await auth.authenticate(params.provider as SupportedProviderName, code, undefined, { response: res });
-  return res;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
+  const { provider } = await params;
+  const { response } = await auth.callback(req, provider);
+  return NextResponse.redirect(new URL("/dashboard", req.url), { headers: response.headers });
 }
 ```
 
@@ -69,12 +63,12 @@ if (!session) redirect("/login");
 **React session — setup (once in your auth config):**
 
 ```typescript
-import { withServerSession } from "nica-next/server";
+// lib/auth.ts
+import { nicaNext } from "nica-next/server";
 
-export const { SessionProvider, useSession } = withServerSession(auth.session);
+export const auth = nicaNext({ ... });
+export const { SessionProvider, useSession } = auth;
 ```
-
-> `nica-next/client` re-exports everything from [`nica-react`](../nica-react) — `withReactSession`, `SessionContextProvider`, `createUseSession`, and `SessionPayload`.
 
 **Wrap your root layout with `SessionProvider`** — `app/layout.tsx`:
 
@@ -135,6 +129,17 @@ session: {
 ## Providers
 
 Supports all providers from [`nica`](../nica#supported-providers): `google` · `github` · `facebook` · `linkedin` · `slack` · `twitter` · `microsoft` · `twitch` · `discord`
+
+Custom providers are also supported — see [`nica` docs](../nica#custom-providers).
+
+## Error Handling
+
+`redirect()` and `callback()` throw `NicaError` on failure. Additional error codes specific to `nica-next`:
+
+| Code | When thrown |
+|------|-------------|
+| `PKCE_COOKIE_MISSING` | `callback()` called but the PKCE cookie is absent or expired |
+| `INVALID_STATE` | PKCE cookie signature invalid, or `state` mismatch between redirect and callback |
 
 ## License
 

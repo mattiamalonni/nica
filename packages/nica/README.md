@@ -71,7 +71,7 @@ All errors thrown by nica are instances of `NicaError`, which extends the native
 | Field | Type | Description |
 |-------|------|-------------|
 | `code` | `NicaErrorCode` | Machine-readable slug identifying the error |
-| `provider` | `SupportedProviderName \| undefined` | Provider involved, if applicable |
+| `provider` | `string \| undefined` | Provider involved, if applicable |
 | `cause` | `unknown` | Underlying cause (ES2022 native `Error.cause`) |
 
 ```typescript
@@ -92,12 +92,44 @@ try {
 
 | Code | When thrown |
 |------|-------------|
-| `UNSUPPORTED_PROVIDER` | Unknown provider name passed to `nica()` |
 | `PROVIDER_NOT_CONFIGURED` | `authenticate()` / `getRedirectUrl()` called for a provider not passed to `nica()` |
 | `INVALID_PROVIDER_CONFIG` | Required config field missing for a provider |
 | `PROVIDER_FETCH_FAILED` | HTTP error while fetching user profile from provider |
 | `TOKEN_EXCHANGE_FAILED` | HTTP error while exchanging authorization code for tokens |
 | `INVALID_SESSION_CONFIG` | Invalid session config (via `nica-next`) |
+
+## Custom Providers
+
+Any OAuth2-compatible provider can be used by supplying a full config. Built-in defaults (URLs, normalizers) are only available for the supported providers listed above.
+
+```typescript
+const auth = nica({
+  providers: {
+    keycloak: {
+      clientId: process.env.KEYCLOAK_CLIENT_ID!,
+      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
+      redirectUri: "https://myapp.com/auth/keycloak/callback",
+      scopes: ["openid", "profile", "email"],
+      authorizationUrl: "https://auth.mycompany.com/realms/myrealm/protocol/openid-connect/auth",
+      tokenUrl: "https://auth.mycompany.com/realms/myrealm/protocol/openid-connect/token",
+      normalizeProfile: (raw) => {
+        const p = raw as Record<string, unknown>;
+        return { id: String(p.sub), email: p.email as string, name: p.name as string, provider: "keycloak", raw: p };
+      },
+      normalizeTokens: (raw) => {
+        const t = raw as Record<string, unknown>;
+        return { accessToken: t.access_token as string, raw: t };
+      },
+      fetchProfile: async (accessToken) => {
+        const res = await fetch("https://auth.mycompany.com/realms/myrealm/protocol/openid-connect/userinfo", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        return res.json();
+      },
+    },
+  },
+});
+```
 
 ## Security
 

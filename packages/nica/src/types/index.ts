@@ -1,10 +1,5 @@
 export type SupportedProviderName = "google" | "github" | "facebook" | "linkedin" | "slack" | "twitter" | "microsoft" | "twitch" | "discord";
 
-type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
-  {
-    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
-  }[Keys];
-
 export type ProviderConfig = {
   clientId: string;
   clientSecret: string;
@@ -38,7 +33,7 @@ export type ProviderConfig = {
   getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
 };
 
-export type ProviderSchema = RequireAtLeastOne<Record<SupportedProviderName, ProviderConfig>>;
+export type ProviderSchema = Record<string, ProviderConfig>;
 
 export type AuthProfile = {
   id: string;
@@ -58,7 +53,7 @@ export interface AuthTokens {
   raw?: Record<string, unknown>;
 }
 
-export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider: SupportedProviderName };
+export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider: string };
 
 export type CreateAuthParams = {
   providers: ProviderSchema;

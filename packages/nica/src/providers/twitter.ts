@@ -14,6 +14,7 @@ export default {
       id: String(data?.id),
       email: undefined,
       name: data?.name as string | undefined,
+      username: data?.username as string | undefined,
       picture: data?.profile_image_url as string | undefined,
       provider: "twitter",
       raw: profile,
