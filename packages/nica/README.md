@@ -23,7 +23,7 @@ const auth = nica({
   },
 });
 
-// 1. Redirect the user to the provider
+// 1. Generate the authorization URL
 const url = auth.generateAuthUrl("github");
 
 // 2. Handle the OAuth callback
