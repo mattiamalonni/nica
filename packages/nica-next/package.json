@@ -4,6 +4,10 @@
   "description": "Next.js adapter for nica — session management and React hooks",
   "repository": "https://github.com/mattiamalonni/nica",
   "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./server": {
       "types": "./dist/server.d.ts",
       "default": "./dist/server.js"
@@ -32,6 +36,7 @@
   },
   "devDependencies": {
     "next": "^16",
+    "@types/node": "^22",
     "@types/react": "^19"
   }
 }

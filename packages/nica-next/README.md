@@ -11,9 +11,9 @@ npm install nica-next
 ## Usage
 
 ```typescript
-import { nicaNext } from "nica-next/server";
+import nica from "nica-next";
 
-const auth = nicaNext({
+const auth = nica({
   providers: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -64,9 +64,9 @@ if (!session) redirect("/login");
 
 ```typescript
 // lib/auth.ts
-import { nicaNext } from "nica-next/server";
+import nica from "nica-next";
 
-export const auth = nicaNext({ ... });
+export const auth = nica({ ... });
 export const { SessionProvider, useSession } = auth;
 ```
 

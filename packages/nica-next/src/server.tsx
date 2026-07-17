@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import type { CreateNextAuthParams } from "./auth";
 import { createNicaNextCore } from "./auth";
 
-export function nicaNext<T extends object>(params: CreateNextAuthParams<T>) {
+export function build<T extends object>(params: CreateNextAuthParams<T>) {
   const core = createNicaNextCore<T>(params);
   const useSession = createUseSession<T>();
 
