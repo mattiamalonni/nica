@@ -33,11 +33,6 @@ jobs:
           npm pkg set version="$VERSION" author="$AUTHOR" license="$LICENSE" --workspace=packages/nica
           npm pkg set version="$VERSION" author="$AUTHOR" license="$LICENSE" --workspace=packages/nica-next
 
-      - name: Copy README to packages
-        run: |
-          cp README.md packages/nica/README.md
-          cp README.md packages/nica-next/README.md
-
       - name: Build nica
         run: npm run build --workspace=packages/nica
       - name: Build nica-next
