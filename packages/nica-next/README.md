@@ -5,7 +5,7 @@ Next.js adapter for [`nica`](../nica) — session management, cookie handling, a
 ## Installation
 
 ```bash
-npm install nica nica-next
+npm install nica-next
 ```
 
 ## Usage
