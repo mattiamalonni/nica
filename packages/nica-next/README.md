@@ -62,18 +62,39 @@ const session = await auth.session.get();
 if (!session) redirect("/login");
 ```
 
-**React hook in a Client Component:**
+**React session — setup (once in your auth config):**
+
+```typescript
+import { withReactSession } from "nica-next/react";
+
+export const { SessionProvider, useSession } = withReactSession(auth.session);
+```
+
+**Wrap your root layout with `SessionProvider`** — `app/layout.tsx`:
+
+```tsx
+import { SessionProvider } from "@/lib/auth";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <SessionProvider>{children}</SessionProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+**Use `useSession` in any Client Component:**
 
 ```typescript
 "use client";
 
-import { withReactSession } from "nica-next";
-
-const { useSession } = withReactSession(auth.session);
+import { useSession } from "@/lib/auth";
 
 export function Profile() {
-  const { session, loading, error } = useSession();
-  if (loading) return <p>Loading...</p>;
+  const { session } = useSession();
   if (!session) return <p>Not authenticated</p>;
   return <p>Welcome {session.userId}</p>;
 }
