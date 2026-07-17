@@ -63,7 +63,7 @@ npm install nica-next
 ```
 
 ```typescript
-import { nicaNext } from "nica-next";
+import { nicaNext } from "nica-next/server";
 
 const auth = nicaNext({
   providers: {
@@ -116,7 +116,7 @@ if (!session) redirect("/login");
 
 ```typescript
 // lib/auth.ts
-import { withServerSession } from "nica-next/react";
+import { withServerSession } from "nica-next/server";
 export const { SessionProvider, useSession } = withServerSession(auth.session);
 ```
 
