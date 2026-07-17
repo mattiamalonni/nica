@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { SessionContextProvider, createUseSession } from "./context";
 
-export function withReactSession<T extends object>(fetchFn: () => Promise<SessionPayload<T> | undefined>) {
+export function useNica<T extends object>(fetchFn: () => Promise<SessionPayload<T> | undefined>) {
   const useSession = createUseSession<T>();
 
   function SessionProvider({ children }: { children: ReactNode }) {

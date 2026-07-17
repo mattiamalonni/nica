@@ -151,9 +151,9 @@ npm install nica-react
 ```
 
 ```typescript
-import { withReactSession } from "nica-react";
+import { useNica } from "nica-react";
 
-export const { SessionProvider, useSession } = withReactSession(async () => {
+export const { SessionProvider, useSession } = useNica(async () => {
   const res = await fetch("/api/session");
   if (!res.ok) return undefined;
   return res.json();

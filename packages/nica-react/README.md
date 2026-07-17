@@ -11,10 +11,10 @@ npm install nica-react
 ## Usage
 
 ```typescript
-import { withReactSession } from "nica-react";
+import { useNica } from "nica-react";
 
 // fetchFn can call any endpoint that returns your session data
-export const { SessionProvider, useSession } = withReactSession(async () => {
+export const { SessionProvider, useSession } = useNica(async () => {
   const res = await fetch("/api/session");
   if (!res.ok) return undefined;
   return res.json();
@@ -49,7 +49,7 @@ export function Profile() {
 
 ## API
 
-### `withReactSession(fetchFn)`
+### `useNica(fetchFn)`
 
 Creates a `SessionProvider` component and a `useSession` hook bound to a shared context.
 
