@@ -5,10 +5,10 @@ const decoder = new TextDecoder();
 /*                              AES-GCM helpers                               */
 /* -------------------------------------------------------------------------- */
 
-async function deriveKey(secret: string, salt: Uint8Array, usage: KeyUsage[]): Promise<CryptoKey> {
+async function deriveKey(secret: string, salt: BufferSource, usage: KeyUsage[]): Promise<CryptoKey> {
   const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(secret), "HKDF", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "HKDF", hash: "SHA-256", salt: salt as unknown as Uint8Array<ArrayBuffer>, info: encoder.encode("nica-session-v1") },
+    { name: "HKDF", hash: "SHA-256", salt, info: encoder.encode("nica-session-v1") },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,

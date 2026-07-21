@@ -31,13 +31,13 @@ export type AuthProfile = {
   raw: Record<string, unknown>;
 };
 
-export interface AuthTokens {
+export type AuthTokens = {
   accessToken: string;
   refreshToken?: string;
   expiresIn?: number;
   tokenType?: string;
   raw: Record<string, unknown>;
-}
+};
 
 export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider: string };
 
@@ -45,7 +45,7 @@ export type CreateAuthParams = {
   providers: ProviderSchema;
 };
 
-export type SessionPayload<T extends object = Record<string, unknown>> = T & {
+export type SessionPayload<T extends object = Record<string, unknown>> = Omit<T, "iat" | "exp"> & {
   iat: number;
   exp: number;
 };
