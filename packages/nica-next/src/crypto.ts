@@ -8,7 +8,7 @@ const decoder = new TextDecoder();
 async function deriveKey(secret: string, salt: Uint8Array, usage: KeyUsage[]): Promise<CryptoKey> {
   const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(secret), "HKDF", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "HKDF", hash: "SHA-256", salt: salt as unknown as Uint8Array<ArrayBuffer>, info: new Uint8Array() },
+    { name: "HKDF", hash: "SHA-256", salt: salt as unknown as Uint8Array<ArrayBuffer>, info: encoder.encode("nica-session-v1") },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
@@ -28,12 +28,12 @@ export async function encryptData(data: string, secret: string): Promise<string>
   combined.set(iv, salt.length);
   combined.set(new Uint8Array(encrypted), salt.length + iv.length);
 
-  return btoa(Array.from(combined).map((b) => String.fromCharCode(b)).join(""));
+  return Buffer.from(combined).toString("base64");
 }
 
 export async function decryptData(token: string, secret: string): Promise<string | null> {
   try {
-    const combined = Uint8Array.from(atob(token), (c) => c.charCodeAt(0));
+    const combined = Buffer.from(token, "base64");
 
     const salt = combined.slice(0, 16);
     const iv = combined.slice(16, 28);
@@ -56,7 +56,7 @@ export async function signData(data: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
 
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
-  const signatureStr = btoa(Array.from(new Uint8Array(signature)).map((b) => String.fromCharCode(b)).join(""));
+  const signatureStr = Buffer.from(new Uint8Array(signature)).toString("base64");
 
   return `${data}.${signatureStr}`;
 }
@@ -72,7 +72,7 @@ export async function verifySignedData(token: string, secret: string): Promise<s
 
     const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
 
-    const signatureBuf = Uint8Array.from(atob(signature), (c) => c.charCodeAt(0));
+    const signatureBuf = Buffer.from(signature, "base64");
     const isValid = await crypto.subtle.verify("HMAC", key, signatureBuf, encoder.encode(data));
 
     return isValid ? data : null;

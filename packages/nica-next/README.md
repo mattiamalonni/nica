@@ -122,6 +122,7 @@ session: {
     secure?: boolean;              // default: true
     sameSite?: "lax" | "strict" | "none"; // default: "lax"
     path?: string;                 // default: "/"
+    domain?: string;               // default: undefined (host-only)
   },
 }
 ```

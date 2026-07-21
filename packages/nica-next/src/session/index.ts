@@ -24,6 +24,7 @@ export type SessionConfig = {
     secure?: boolean;
     sameSite?: "lax" | "strict" | "none";
     path?: string;
+    domain?: string;
   };
 };
 
@@ -63,6 +64,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
       secure: sessionConfig.cookie?.secure !== false,
       sameSite: sessionConfig.cookie?.sameSite ?? "lax",
       path: sessionConfig.cookie?.path ?? "/",
+      domain: sessionConfig.cookie?.domain,
     },
   };
 
@@ -70,7 +72,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
 
   const encodeToken = async (payload: SessionPayload<T>): Promise<string> => {
     const json = JSON.stringify(payload);
-    return config.strategy === "encrypted" ? encryptData(json, config.secret) : signData(btoa(json), config.secret);
+    return config.strategy === "encrypted" ? encryptData(json, config.secret) : signData(Buffer.from(json).toString("base64"), config.secret);
   };
 
   const decodeToken = async (token: string, validateExp: boolean): Promise<SessionPayload<T> | null> => {
@@ -80,7 +82,7 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
       json = await decryptData(token, config.secret);
     } else {
       const verified = await verifySignedData(token, config.secret);
-      if (verified) json = atob(verified);
+      if (verified) json = Buffer.from(verified, "base64").toString();
     }
 
     if (!json) return null;

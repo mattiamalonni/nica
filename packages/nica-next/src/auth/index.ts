@@ -26,7 +26,7 @@ export function createNicaNextCore<T extends object>({ providers, session: sessi
 
   const redirect = async (provider: string): Promise<NextResponse> => {
     const { url, state, codeVerifier } = await auth.getRedirectUrl(provider);
-    const payload = btoa(JSON.stringify({ state, codeVerifier }));
+    const payload = Buffer.from(JSON.stringify({ state, codeVerifier })).toString("base64");
     const signed = await signData(payload, sessionConfig.secret);
 
     const response = NextResponse.redirect(url);
@@ -53,7 +53,15 @@ export function createNicaNextCore<T extends object>({ providers, session: sessi
       throw new NicaError(`Invalid PKCE cookie for provider: ${provider}`, { code: NicaErrorCode.INVALID_STATE, provider });
     }
 
-    const { state: savedState, codeVerifier } = JSON.parse(atob(verified)) as { state: string; codeVerifier: string };
+    let savedState: string;
+    let codeVerifier: string | undefined;
+    try {
+      const parsed = JSON.parse(Buffer.from(verified, "base64").toString()) as { state: string; codeVerifier: string };
+      savedState = parsed.state;
+      codeVerifier = parsed.codeVerifier;
+    } catch {
+      throw new NicaError(`Malformed PKCE cookie for provider: ${provider}`, { code: NicaErrorCode.INVALID_STATE, provider });
+    }
     const incomingState = req.nextUrl.searchParams.get("state");
 
     if (!incomingState || incomingState !== savedState) {
