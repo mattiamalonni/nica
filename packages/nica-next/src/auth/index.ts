@@ -70,7 +70,7 @@ export function createNicaNextCore<T extends object>({ providers, session: sessi
 
     const response = new NextResponse();
     await session.create(sessionData, { response });
-    response.cookies.delete(cookieName);
+    response.cookies.set(cookieName, "", { httpOnly: true, secure: true, sameSite: "lax", maxAge: 0, path: "/" });
 
     return { data: sessionData, response };
   };

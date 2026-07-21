@@ -11,23 +11,9 @@ export type ProviderConfig = {
 
   exchangeCodeForTokens?: (code: string, codeVerifier?: string) => Promise<unknown>;
 
-  normalizeProfile?: (rawProfile: unknown) => {
-    id: string;
-    email?: string;
-    name?: string;
-    username?: string;
-    picture?: string;
-    provider: string;
-    raw: Record<string, unknown>;
-  };
+  normalizeProfile?: (rawProfile: unknown) => AuthProfile;
 
-  normalizeTokens?: (rawTokens: unknown) => {
-    accessToken: string;
-    refreshToken?: string;
-    tokenType?: string;
-    expiresIn?: number;
-    raw: Record<string, unknown>;
-  };
+  normalizeTokens?: (rawTokens: unknown) => AuthTokens;
 
   fetchProfile?: (accessToken: string, clientId?: string) => Promise<unknown>;
   getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
@@ -42,7 +28,7 @@ export type AuthProfile = {
   username?: string;
   picture?: string;
   provider: string;
-  raw?: Record<string, unknown>;
+  raw: Record<string, unknown>;
 };
 
 export interface AuthTokens {
@@ -50,7 +36,7 @@ export interface AuthTokens {
   refreshToken?: string;
   expiresIn?: number;
   tokenType?: string;
-  raw?: Record<string, unknown>;
+  raw: Record<string, unknown>;
 }
 
 export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider: string };

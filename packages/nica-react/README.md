@@ -13,11 +13,13 @@ npm install nica-react
 ```typescript
 import { useNica } from "nica-react";
 
-// fetchFn can call any endpoint that returns your session data
-export const { SessionProvider, useSession } = useNica(async () => {
-  const res = await fetch("/api/session");
-  if (!res.ok) return undefined;
-  return res.json();
+// getSession can call any endpoint that returns your session data
+export const { SessionProvider, useSession } = useNica({
+  getSession: async () => {
+    const res = await fetch("/api/session");
+    if (!res.ok) return undefined;
+    return res.json();
+  },
 });
 ```
 
@@ -49,16 +51,17 @@ export function Profile() {
 
 ## API
 
-### `useNica(fetchFn)`
+### `useNica(options)`
 
 Creates a `SessionProvider` component and a `useSession` hook bound to a shared context.
 
-- `fetchFn` — async function that fetches session data. Called once on mount inside `SessionProvider`. Should return `SessionPayload<T> | undefined`.
+- `options.getSession` — async function that fetches session data. Called once on mount inside `SessionProvider`. Should return `SessionPayload<T> | undefined`.
+- `options.deleteSession` — optional async function to destroy the session. When provided, `useSession().deleteSession` will call it and clear local state.
 - Returns `{ SessionProvider, useSession }`
 
 ### `useSession()`
 
-Returns `{ session: SessionPayload<T> | undefined; isLoading: boolean }`. Must be called inside a `<SessionProvider>`. Throws if used outside one.
+Returns `{ session: SessionPayload<T> | undefined; isLoading: boolean; refreshSession: () => Promise<SessionPayload<T> | undefined>; deleteSession: (() => Promise<void>) | undefined }`. Must be called inside a `<SessionProvider>`. Throws if used outside one.
 
 ### `SessionContextProvider`
 

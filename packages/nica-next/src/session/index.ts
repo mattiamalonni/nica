@@ -10,7 +10,7 @@ import { decryptData, encryptData, signData, verifySignedData } from "../crypto"
 export type SessionConfig = {
   secret: string;
   /**
-   * "encrypted" (default): AES-GCM encryption via PBKDF2-derived key. Payload is private.
+   * "encrypted" (default): AES-GCM encryption via HKDF-derived key. Payload is private.
    * "signed": HMAC-SHA256 integrity only. Payload is base64-encoded and **readable** by anyone
    * with access to the cookie. Do not store sensitive data (tokens, secrets) with this strategy.
    */

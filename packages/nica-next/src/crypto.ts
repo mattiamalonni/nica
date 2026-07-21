@@ -6,9 +6,9 @@ const decoder = new TextDecoder();
 /* -------------------------------------------------------------------------- */
 
 async function deriveKey(secret: string, salt: Uint8Array, usage: KeyUsage[]): Promise<CryptoKey> {
-  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(secret), "PBKDF2", false, ["deriveKey"]);
+  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(secret), "HKDF", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt: salt as unknown as Uint8Array<ArrayBuffer>, iterations: 100_000, hash: "SHA-256" },
+    { name: "HKDF", hash: "SHA-256", salt: salt as unknown as Uint8Array<ArrayBuffer>, info: new Uint8Array() },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
@@ -28,7 +28,7 @@ export async function encryptData(data: string, secret: string): Promise<string>
   combined.set(iv, salt.length);
   combined.set(new Uint8Array(encrypted), salt.length + iv.length);
 
-  return btoa(String.fromCharCode(...combined));
+  return btoa(Array.from(combined).map((b) => String.fromCharCode(b)).join(""));
 }
 
 export async function decryptData(token: string, secret: string): Promise<string | null> {
@@ -56,7 +56,7 @@ export async function signData(data: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
 
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
-  const signatureStr = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  const signatureStr = btoa(Array.from(new Uint8Array(signature)).map((b) => String.fromCharCode(b)).join(""));
 
   return `${data}.${signatureStr}`;
 }

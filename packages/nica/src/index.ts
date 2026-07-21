@@ -51,13 +51,11 @@ export function nica({ providers }: CreateAuthParams) {
 
     const exchangeCodeForTokens =
       config.exchangeCodeForTokens || createExchangeCodeForTokensFunction({ tokenUrl, clientId, clientSecret, redirectUri });
-    if (!exchangeCodeForTokens) throw new NicaError(`Missing exchangeCodeForTokens for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const fetchProfile = config.fetchProfile || PROVIDER?.fetchProfile;
     if (!fetchProfile) throw new NicaError(`Missing fetchProfile for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const getAuthUrl = config.getAuthUrl || createGetAuthUrlFunction({ authorizationUrl, clientId, redirectUri, scopes });
-    if (!getAuthUrl) throw new NicaError(`Missing getAuthUrl for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     p[name] = {
       clientId,
