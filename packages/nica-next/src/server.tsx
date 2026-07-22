@@ -20,32 +20,7 @@ export function build<T extends object>(params: CreateNextAuthParams<T>) {
       data = undefined;
     }
 
-    async function refreshSession(): Promise<SessionPayload<Record<string, unknown>> | undefined> {
-      "use server";
-      try {
-        return (await core.session.get()) as SessionPayload<Record<string, unknown>> | undefined;
-      } catch {
-        return undefined;
-      }
-    }
-
-    async function deleteSession(): Promise<void> {
-      "use server";
-      await core.session.destroy();
-    }
-
-    return (
-      <SessionContextProvider
-        value={{
-          data: data as SessionPayload<Record<string, unknown>> | undefined,
-          isLoading: false,
-          refreshSession,
-          deleteSession,
-        }}
-      >
-        {children}
-      </SessionContextProvider>
-    );
+    return <SessionContextProvider value={{ data }}>{children}</SessionContextProvider>;
   }
 
   return { ...core, SessionProvider };

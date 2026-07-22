@@ -56,12 +56,11 @@ export function Profile() {
 Creates a `SessionProvider` component and a `useSession` hook bound to a shared context.
 
 - `options.getSession` — async function that fetches session data. Called once on mount inside `SessionProvider`. Should return `SessionPayload<T> | undefined`.
-- `options.deleteSession` — optional async function to destroy the session. When provided, `useSession().deleteSession` will call it and clear local state.
 - Returns `{ SessionProvider, useSession }`
 
 ### `useSession()`
 
-Returns `{ session: SessionPayload<T> | undefined; isLoading: boolean; refreshSession: () => Promise<SessionPayload<T> | undefined>; deleteSession: (() => Promise<void>) | undefined }`. Must be called inside a `<SessionProvider>`. Throws if used outside one.
+Returns `{ session: SessionPayload<T> | undefined }`. Must be called inside a `<SessionProvider>`. Throws if used outside one.
 
 ### `SessionContextProvider`
 
