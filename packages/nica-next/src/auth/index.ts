@@ -56,7 +56,7 @@ export function createNicaNextCore<T extends object>({ providers, session: sessi
     let savedState: string;
     let codeVerifier: string | undefined;
     try {
-      const parsed = JSON.parse(Buffer.from(verified, "base64").toString()) as { state: string; codeVerifier: string };
+      const parsed = JSON.parse(Buffer.from(verified, "base64").toString()) as { state: string; codeVerifier?: string };
       savedState = parsed.state;
       codeVerifier = parsed.codeVerifier;
     } catch {

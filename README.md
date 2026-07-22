@@ -37,10 +37,10 @@ const auth = nica({
   },
 });
 
-// 1. Generate the authorization URL (includes CSRF state and PKCE verifier)
+// 1. Generate the authorization URL (includes CSRF state; PKCE verifier when supported)
 const { url, state, codeVerifier } = await auth.getRedirectUrl("github");
-// → save `state` and `codeVerifier` between this request and the callback
-//   (e.g. short-lived signed cookies)
+// → save `state` and `codeVerifier` (may be undefined for providers with pkce: false)
+//   between this request and the callback (e.g. short-lived signed cookies)
 
 // 2. Handle the OAuth callback
 // → verify that the `state` query param matches what you saved
@@ -48,7 +48,7 @@ const { tokens, profile, provider } = await auth.authenticate("github", code, co
 // → decide what to do: save to DB, create session, etc.
 ```
 
-`getRedirectUrl()` automatically generates a cryptographically random `state` parameter (CSRF protection) and a PKCE `code_verifier`/`code_challenge` pair (RFC 7636).
+`getRedirectUrl()` automatically generates a cryptographically random `state` parameter (CSRF protection) and, by default, a PKCE `code_verifier`/`code_challenge` pair (RFC 7636). Set `pkce: false` in a provider's config to disable PKCE for providers that don't support it (e.g. `facebook` has it pre-configured).
 
 [Full documentation →](./packages/nica)
 

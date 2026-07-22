@@ -5,6 +5,7 @@ export default {
   authorizationUrl: "https://www.facebook.com/v21.0/dialog/oauth",
   tokenUrl: "https://graph.facebook.com/v21.0/oauth/access_token",
   scopes: ["email", "public_profile"],
+  pkce: false,
 
   normalizeProfile(rawProfile: unknown) {
     const profile = rawProfile as Record<string, unknown>;

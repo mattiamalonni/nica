@@ -55,11 +55,9 @@ export const createExchangeCodeForTokensFunction =
   };
 
 export const createGetAuthUrlFunction =
-  ({ authorizationUrl, clientId, redirectUri, scopes }: Pick<Required<ProviderConfig>, "authorizationUrl" | "clientId" | "redirectUri" | "scopes">) =>
-  async (): Promise<{ url: string; state: string; codeVerifier: string }> => {
+  ({ authorizationUrl, clientId, redirectUri, scopes, pkce = true }: Pick<Required<ProviderConfig>, "authorizationUrl" | "clientId" | "redirectUri" | "scopes"> & { pkce?: boolean }) =>
+  async (): Promise<{ url: string; state: string; codeVerifier?: string }> => {
     const state = generateRandomBase64Url(32);
-    const codeVerifier = generateRandomBase64Url(48);
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -67,9 +65,15 @@ export const createGetAuthUrlFunction =
       response_type: "code",
       scope: scopes.join(" "),
       state,
-      code_challenge: codeChallenge,
-      code_challenge_method: "S256",
     });
+
+    let codeVerifier: string | undefined;
+    if (pkce) {
+      codeVerifier = generateRandomBase64Url(48);
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      params.set("code_challenge", codeChallenge);
+      params.set("code_challenge_method", "S256");
+    }
 
     return { url: `${authorizationUrl}?${params.toString()}`, state, codeVerifier };
   };

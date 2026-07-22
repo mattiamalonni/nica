@@ -8,6 +8,7 @@ export type ProviderConfig = {
 
   authorizationUrl?: string;
   tokenUrl?: string;
+  pkce?: boolean;
 
   exchangeCodeForTokens?: (code: string, codeVerifier?: string) => Promise<unknown>;
 
@@ -16,7 +17,7 @@ export type ProviderConfig = {
   normalizeTokens?: (rawTokens: unknown) => AuthTokens;
 
   fetchProfile?: (accessToken: string, clientId?: string) => Promise<unknown>;
-  getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
+  getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier?: string }>;
 };
 
 export type ProviderSchema = Record<string, ProviderConfig>;

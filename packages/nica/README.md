@@ -23,10 +23,10 @@ const auth = nica({
   },
 });
 
-// 1. Generate the authorization URL (includes CSRF state and PKCE verifier)
+// 1. Generate the authorization URL (includes CSRF state; PKCE verifier when supported)
 const { url, state, codeVerifier } = await auth.getRedirectUrl("github");
-// → save `state` and `codeVerifier` somewhere between this request and the callback
-//   (e.g. short-lived signed cookies)
+// → save `state` and `codeVerifier` (may be undefined for providers with pkce: false)
+//   somewhere between this request and the callback (e.g. short-lived signed cookies)
 
 // 2a. Exchange the code for tokens only (e.g. to save them or call extra provider APIs)
 const tokens = await auth.exchangeCode("github", code, codeVerifier);
@@ -54,11 +54,12 @@ nica({
       scopes?: string[];
       authorizationUrl?: string;
       tokenUrl?: string;
+      pkce?: boolean;             // default true — set to false for providers that don't support PKCE (e.g. facebook)
       exchangeCodeForTokens?: (code: string, codeVerifier?: string) => Promise<unknown>;
       fetchProfile?: (accessToken: string) => Promise<unknown>;
       normalizeProfile?: (raw: unknown) => AuthProfile;
       normalizeTokens?: (raw: unknown) => AuthTokens;
-      getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier: string }>;
+      getAuthUrl?: () => Promise<{ url: string; state: string; codeVerifier?: string }>;
     },
   },
 });
@@ -133,7 +134,9 @@ const auth = nica({
 
 ## Security
 
-`getRedirectUrl()` automatically generates a cryptographically random `state` parameter (CSRF protection) and a PKCE `code_verifier`/`code_challenge` pair (RFC 7636). You are responsible for persisting `state` and `codeVerifier` between the redirect and the callback (e.g. via short-lived cookies), and for verifying that the `state` received in the callback matches the one you stored.
+`getRedirectUrl()` automatically generates a cryptographically random `state` parameter (CSRF protection) and, by default, a PKCE `code_verifier`/`code_challenge` pair (RFC 7636). You are responsible for persisting `state` and `codeVerifier` between the redirect and the callback (e.g. via short-lived cookies), and for verifying that the `state` received in the callback matches the one you stored.
+
+Providers that do not support PKCE (e.g. `facebook`) ship with `pkce: false` pre-configured. You can also set `pkce: false` in your own provider config to disable PKCE for a custom provider — `codeVerifier` will be `undefined` in that case.
 
 ## Next.js
 

@@ -55,7 +55,8 @@ export function nica({ providers }: CreateAuthParams) {
     const fetchProfile = config.fetchProfile || PROVIDER?.fetchProfile;
     if (!fetchProfile) throw new NicaError(`Missing fetchProfile for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
-    const getAuthUrl = config.getAuthUrl || createGetAuthUrlFunction({ authorizationUrl, clientId, redirectUri, scopes });
+    const pkce = config.pkce !== false;
+    const getAuthUrl = config.getAuthUrl || createGetAuthUrlFunction({ authorizationUrl, clientId, redirectUri, scopes, pkce });
 
     p[name] = {
       clientId,
@@ -78,7 +79,7 @@ export function nica({ providers }: CreateAuthParams) {
     return provider;
   };
 
-  const getRedirectUrl = async (providerName: string): Promise<{ url: string; state: string; codeVerifier: string }> => {
+  const getRedirectUrl = async (providerName: string): Promise<{ url: string; state: string; codeVerifier?: string }> => {
     const provider = getProvider(providerName);
     return provider.getAuthUrl();
   };
