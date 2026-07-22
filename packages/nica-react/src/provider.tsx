@@ -1,8 +1,8 @@
 "use client";
 
-import type { SessionPayload } from "nica";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import type { SessionPayload } from "./context";
 import { SessionContextProvider, useSession } from "./context";
 
 type UseNicaOptions = {

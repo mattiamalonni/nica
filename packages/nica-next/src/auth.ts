@@ -17,7 +17,7 @@ export type NicaNextCore<T extends object> = {
   callback: (req: NextRequest, provider: string) => Promise<{ data: T; response: NextResponse }>;
 };
 
-export function createNicaNextCore<T extends object>({ nica, session, onProfile }: CreateNicaNextParams<T>): NicaNextCore<T> {
+export function createNicaAuth<T extends object>({ nica, session, onProfile }: CreateNicaNextParams<T>): NicaNextCore<T> {
   const redirect = async (provider: string): Promise<NextResponse> => {
     const { url, state, codeVerifier } = await nica.getRedirectUrl(provider);
     const payload = Buffer.from(JSON.stringify({ state, codeVerifier })).toString("base64");

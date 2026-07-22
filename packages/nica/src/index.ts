@@ -1,5 +1,5 @@
 export { NicaError, NicaErrorCode } from "./errors";
-export type { AuthCallback, AuthProfile, AuthTokens, CreateAuthParams, SessionPayload, SupportedProviderName } from "./types";
+export type { AuthCallback, AuthProfile, AuthTokens, CreateAuthParams, SupportedProviderName } from "./types";
 
 import { createExchangeCodeForTokensFunction, createGetAuthUrlFunction } from "./defaults";
 import { NicaError, NicaErrorCode } from "./errors";

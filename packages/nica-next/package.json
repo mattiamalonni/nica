@@ -27,16 +27,15 @@
     "dist"
   ],
   "dependencies": {
-    "nica": "*",
-    "nica-react": "*"
+    "nica": "*"
   },
   "peerDependencies": {
     "next": "^16",
     "react": "^19"
   },
   "devDependencies": {
-    "next": "^16",
     "@types/node": "^22",
-    "@types/react": "^19"
+    "@types/react": "^19",
+    "next": "^16"
   }
 }

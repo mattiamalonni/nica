@@ -1,4 +1,4 @@
 "use client";
 
-export type { SessionPayload } from "nica";
-export { SessionContextProvider, useSession } from "nica-react";
+export type { SessionPayload } from "../session";
+export { SessionContextProvider, useSession } from "./context";

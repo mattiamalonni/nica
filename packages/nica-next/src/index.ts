@@ -2,16 +2,16 @@ export { createNica } from "nica";
 export type { NicaInstance } from "nica";
 
 export { createNicaSession } from "./session";
-export type { SessionConfig, SessionContext, SessionMethods } from "./session";
+export type { SessionConfig, SessionContext, SessionMethods, SessionPayload } from "./session";
 
 export type { CreateNicaNextParams } from "./auth";
 import type { CreateNicaNextParams } from "./auth";
-import { createNicaNextCore } from "./auth";
+import { createNicaAuth } from "./auth";
 
 const globalSymbol = Symbol.for("nica-next");
 
 function buildNicaNextInstance<T extends object>(params: CreateNicaNextParams<T>) {
-  return createNicaNextCore<T>(params);
+  return createNicaAuth<T>(params);
 }
 
 export function createNicaNext<T extends object>(params: CreateNicaNextParams<T>) {

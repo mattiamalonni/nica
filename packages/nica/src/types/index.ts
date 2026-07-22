@@ -45,8 +45,3 @@ export type AuthCallback = { tokens: AuthTokens; profile: AuthProfile; provider:
 export type CreateAuthParams = {
   providers: ProviderSchema;
 };
-
-export type SessionPayload<T extends object = Record<string, unknown>> = Omit<T, "iat" | "exp"> & {
-  iat: number;
-  exp: number;
-};

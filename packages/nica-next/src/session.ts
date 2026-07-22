@@ -1,7 +1,11 @@
 import type { NextRequest, NextResponse } from "next/server";
-import type { SessionPayload } from "nica";
 import { NicaError, NicaErrorCode } from "nica";
 import { decryptData, encryptData, signData, verifySignedData } from "./crypto";
+
+export type SessionPayload<T extends object = Record<string, unknown>> = Omit<T, "iat" | "exp"> & {
+  iat: number;
+  exp: number;
+};
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
