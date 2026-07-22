@@ -14,28 +14,18 @@ const NO_PROVIDER = Symbol("nica.no_provider");
 
 const SessionContext = createContext<SessionContextValue>(NO_PROVIDER);
 
-export function SessionContextProvider({
-  value,
-  children,
-}: {
-  value: SessionContextData;
-  children: ReactNode;
-}) {
+export function SessionContextProvider({ value, children }: { value: SessionContextData; children: ReactNode }) {
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
-export function createUseSession<T extends object>() {
-  return function useSession(): {
-    session: SessionPayload<T> | undefined;
-  } {
-    const value = useContext(SessionContext);
-    if (value === NO_PROVIDER) {
-      throw new Error(
-        "[nica-react] useSession() must be called inside <SessionProvider>. Add <SessionProvider> to your root layout.",
-      );
-    }
-    return {
-      session: value.data as SessionPayload<T> | undefined,
-    };
+export function useSession<T extends object = Record<string, unknown>>(): {
+  session: SessionPayload<T> | undefined;
+} {
+  const value = useContext(SessionContext);
+  if (value === NO_PROVIDER) {
+    throw new Error("[nica-react] useSession() must be called inside <SessionProvider>. Add <SessionProvider> to your root layout.");
+  }
+  return {
+    session: value.data as SessionPayload<T> | undefined,
   };
 }

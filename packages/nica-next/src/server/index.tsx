@@ -1,9 +1,9 @@
-export type { SessionConfig, SessionContext, SessionMethods } from "./session";
+export type { SessionConfig, SessionContext, SessionMethods } from "../session";
 
 import type { SessionPayload } from "nica";
 import { NicaError } from "nica";
 import { SessionContextProvider } from "nica-react";
-import type { SessionMethods } from "./session";
+import type { SessionMethods } from "../session";
 
 type SessionProviderProps<T extends object> = React.PropsWithChildren<{
   session: SessionMethods<T>;

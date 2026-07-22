@@ -77,26 +77,19 @@ import { createNica, createNicaSession, createNicaNext } from "nica-next";
 const nica = createNica({ providers: { ... } });
 export const session = createNicaSession({ secret: process.env.SESSION_SECRET! });
 export const auth = createNicaNext({ nica, session, onProfile: async () => { ... } });
-export const { SessionProvider } = auth;
-```
-
-```typescript
-// lib/hooks.ts  (client-only — import only from "use client" files)
-import { createUseSession } from "nica-next/client";
-
-export const useSession = createUseSession<{ userId: string }>();
 ```
 
 **Wrap your root layout with `SessionProvider`** — `app/layout.tsx`:
 
 ```tsx
-import { SessionProvider } from "@/lib/auth";
+import { SessionProvider } from "nica-next/server";
+import { session } from "@/lib/auth";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider session={session}>{children}</SessionProvider>
       </body>
     </html>
   );
@@ -108,10 +101,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```typescript
 "use client";
 
-import { useSession } from "@/lib/hooks";
+import { useSession } from "nica-next/client";
 
 export function Profile() {
-  const { session } = useSession();
+  const { session } = useSession<{ userId: string }>();
   if (!session) return <p>Not authenticated</p>;
   return <p>Welcome {session.userId}</p>;
 }

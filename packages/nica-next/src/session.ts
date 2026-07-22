@@ -1,7 +1,7 @@
 import type { NextRequest, NextResponse } from "next/server";
 import type { SessionPayload } from "nica";
 import { NicaError, NicaErrorCode } from "nica";
-import { decryptData, encryptData, signData, verifySignedData } from "../crypto";
+import { decryptData, encryptData, signData, verifySignedData } from "./crypto";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */

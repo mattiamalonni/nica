@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AuthCallback, NicaInstance } from "nica";
 import { NicaError, NicaErrorCode } from "nica";
-import type { SessionMethods } from "../session";
+import type { SessionMethods } from "./session";
 
 const PKCE_COOKIE_TTL = 600; // 10 minutes
 
