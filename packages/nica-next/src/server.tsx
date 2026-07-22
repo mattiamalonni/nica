@@ -19,13 +19,28 @@ export function build<T extends object>(params: CreateNextAuthParams<T>) {
       if (!(err instanceof NicaError)) throw err;
       data = undefined;
     }
+
+    async function refreshSession(): Promise<SessionPayload<Record<string, unknown>> | undefined> {
+      "use server";
+      try {
+        return (await core.session.get()) as SessionPayload<Record<string, unknown>> | undefined;
+      } catch {
+        return undefined;
+      }
+    }
+
+    async function deleteSession(): Promise<void> {
+      "use server";
+      await core.session.destroy();
+    }
+
     return (
       <SessionContextProvider
         value={{
           data: data as SessionPayload<Record<string, unknown>> | undefined,
           isLoading: false,
-          refreshSession: async () => undefined,
-          deleteSession: undefined,
+          refreshSession,
+          deleteSession,
         }}
       >
         {children}
