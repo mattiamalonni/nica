@@ -60,14 +60,23 @@ const session = await auth.session.get();
 if (!session) redirect("/login");
 ```
 
-**React session — setup (once in your auth config):**
+**React session — setup:**
+
+`nica()` is server-safe and can be imported from Server Components. `useSession` lives in a separate client-only entry so it never leaks into the server bundle.
 
 ```typescript
-// lib/auth.ts
+// lib/auth.ts  (server-safe — import freely from Server Components)
 import nica from "nica-next";
 
 export const auth = nica({ ... });
-export const { SessionProvider, useSession } = auth;
+export const { SessionProvider } = auth;
+```
+
+```typescript
+// lib/hooks.ts  (client-only — import only from "use client" files)
+import { createUseSession } from "nica-next/client";
+
+export const useSession = createUseSession<{ userId: string }>();
 ```
 
 **Wrap your root layout with `SessionProvider`** — `app/layout.tsx`:
@@ -91,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```typescript
 "use client";
 
-import { useSession } from "@/lib/auth";
+import { useSession } from "@/lib/hooks";
 
 export function Profile() {
   const { session } = useSession();

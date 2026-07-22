@@ -4,13 +4,12 @@ export type { SessionConfig, SessionContext, SessionMethods } from "./session";
 
 import type { SessionPayload } from "nica";
 import { NicaError } from "nica";
-import { SessionContextProvider, createUseSession } from "nica-react";
+import { SessionContextProvider } from "nica-react";
 import type { CreateNextAuthParams } from "./auth";
 import { createNicaNextCore } from "./auth";
 
 export function build<T extends object>(params: CreateNextAuthParams<T>) {
   const core = createNicaNextCore<T>(params);
-  const useSession = createUseSession<T>();
 
   async function SessionProvider({ children }: React.PropsWithChildren) {
     let data: SessionPayload<T> | undefined;
@@ -34,5 +33,5 @@ export function build<T extends object>(params: CreateNextAuthParams<T>) {
     );
   }
 
-  return { ...core, SessionProvider, useSession };
+  return { ...core, SessionProvider };
 }
