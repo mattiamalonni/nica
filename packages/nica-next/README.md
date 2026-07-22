@@ -11,9 +11,9 @@ npm install nica-next
 ## Usage
 
 ```typescript
-import nica from "nica-next";
+import { createNica, createNicaSession, createNicaNext } from "nica-next";
 
-const auth = nica({
+const nica = createNica({
   providers: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -21,9 +21,15 @@ const auth = nica({
       redirectUri: "https://myapp.com/api/auth/github/callback",
     },
   },
-  session: {
-    secret: process.env.SESSION_SECRET!,
-  },
+});
+
+const session = createNicaSession({
+  secret: process.env.SESSION_SECRET!,
+});
+
+const auth = createNicaNext({
+  nica,
+  session,
   onProfile: async ({ profile }) => {
     // Save user to DB, return data to store in session
     const user = await db.upsertUser(profile);
@@ -56,19 +62,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
 **Read session in a Server Component:**
 
 ```typescript
-const session = await auth.session.get();
-if (!session) redirect("/login");
+const data = await session.get();
+if (!data) redirect("/login");
 ```
 
 **React session — setup:**
 
-`nica()` is server-safe and can be imported from Server Components. `useSession` lives in a separate client-only entry so it never leaks into the server bundle.
+`createNicaNext()` is server-safe and can be imported from Server Components. `useSession` lives in a separate client-only entry so it never leaks into the server bundle.
 
 ```typescript
 // lib/auth.ts  (server-safe — import freely from Server Components)
-import nica from "nica-next";
+import { createNica, createNicaSession, createNicaNext } from "nica-next";
 
-export const auth = nica({ ... });
+const nica = createNica({ providers: { ... } });
+export const session = createNicaSession({ secret: process.env.SESSION_SECRET! });
+export const auth = createNicaNext({ nica, session, onProfile: async () => { ... } });
 export const { SessionProvider } = auth;
 ```
 
@@ -113,27 +121,27 @@ export function Profile() {
 
 ```typescript
 const res = NextResponse.redirect(new URL("/", req.url));
-await auth.session.destroy({ response: res });
+await session.destroy({ response: res });
 return res;
 ```
 
 ## Session Configuration
 
 ```typescript
-session: {
-  secret: string;                  // required, min 32 chars
-  strategy?: "encrypted" | "signed"; // default: "encrypted" (AES-GCM)
-  tokenExp?: number;               // default: 7 days (seconds)
-  cookie?: {
-    name?: string;                 // default: "nica_session"
-    maxAge?: number;               // default: 7 days (seconds)
-    httpOnly?: boolean;            // default: true
-    secure?: boolean;              // default: true
-    sameSite?: "lax" | "strict" | "none"; // default: "lax"
-    path?: string;                 // default: "/"
-    domain?: string;               // default: undefined (host-only)
+const session = createNicaSession({
+  secret: "...", // required, min 32 chars
+  strategy: "encrypted", // "encrypted" (default, AES-GCM) | "signed" (HMAC, readable payload)
+  tokenExp: 604800, // default: 7 days (seconds)
+  cookie: {
+    name: "nica_session", // default: "nica_session"
+    maxAge: 604800, // default: 7 days (seconds)
+    httpOnly: true, // default: true
+    secure: true, // default: true
+    sameSite: "lax", // default: "lax"
+    path: "/", // default: "/"
+    domain: undefined, // default: host-only
   },
-}
+});
 ```
 
 ## Providers
@@ -146,10 +154,10 @@ Custom providers are also supported — see [`nica` docs](../nica#custom-provide
 
 `redirect()` and `callback()` throw `NicaError` on failure. Additional error codes specific to `nica-next`:
 
-| Code | When thrown |
-|------|-------------|
-| `PKCE_COOKIE_MISSING` | `callback()` called but the PKCE cookie is absent or expired |
-| `INVALID_STATE` | PKCE cookie signature invalid, or `state` mismatch between redirect and callback |
+| Code                  | When thrown                                                                      |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `PKCE_COOKIE_MISSING` | `callback()` called but the PKCE cookie is absent or expired                     |
+| `INVALID_STATE`       | PKCE cookie signature invalid, or `state` mismatch between redirect and callback |
 
 ## License
 

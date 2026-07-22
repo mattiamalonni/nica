@@ -38,13 +38,15 @@ export type SessionMethods<T extends object> = {
   get: (context?: SessionContext) => Promise<SessionPayload<T> | undefined>;
   peek: (context?: SessionContext) => Promise<SessionPayload<T> | undefined>;
   destroy: (context?: SessionContext) => Promise<void>;
+  sign: (data: string) => Promise<string>;
+  verify: (data: string) => Promise<string | null>;
 };
 
 /* -------------------------------------------------------------------------- */
 /*                               createSession                                */
 /* -------------------------------------------------------------------------- */
 
-export function createSession<T extends object = {}>(sessionConfig: SessionConfig): SessionMethods<T> {
+export function createNicaSession<T extends object = {}>(sessionConfig: SessionConfig): SessionMethods<T> {
   if (!sessionConfig?.secret) {
     throw new NicaError("Session secret is required", { code: NicaErrorCode.INVALID_SESSION_CONFIG });
   }
@@ -167,5 +169,9 @@ export function createSession<T extends object = {}>(sessionConfig: SessionConfi
     destroy: async (context?: SessionContext): Promise<void> => {
       await clearCookie(context);
     },
+
+    sign: (data: string): Promise<string> => signData(data, config.secret),
+
+    verify: (data: string): Promise<string | null> => verifySignedData(data, config.secret),
   };
 }

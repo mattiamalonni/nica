@@ -11,9 +11,9 @@ npm install nica
 ## Usage
 
 ```typescript
-import { nica } from "nica";
+import { createNica } from "nica";
 
-const auth = nica({
+const auth = createNica({
   providers: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -43,7 +43,7 @@ const { tokens, profile, provider } = await auth.authenticate("github", code, co
 ## Provider Configuration
 
 ```typescript
-nica({
+createNica({
   providers: {
     github: {
       clientId: string;           // required
@@ -69,11 +69,11 @@ nica({
 
 All errors thrown by nica are instances of `NicaError`, which extends the native `Error` with two extra fields:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `code` | `NicaErrorCode` | Machine-readable slug identifying the error |
-| `provider` | `string \| undefined` | Provider involved, if applicable |
-| `cause` | `unknown` | Underlying cause (ES2022 native `Error.cause`) |
+| Field      | Type                  | Description                                    |
+| ---------- | --------------------- | ---------------------------------------------- |
+| `code`     | `NicaErrorCode`       | Machine-readable slug identifying the error    |
+| `provider` | `string \| undefined` | Provider involved, if applicable               |
+| `cause`    | `unknown`             | Underlying cause (ES2022 native `Error.cause`) |
 
 ```typescript
 import { NicaError, NicaErrorCode } from "nica";
@@ -82,22 +82,22 @@ try {
   const { tokens, profile } = await auth.authenticate("github", code, codeVerifier);
 } catch (err) {
   if (err instanceof NicaError) {
-    console.error(err.code);     // e.g. "PROVIDER_FETCH_FAILED"
+    console.error(err.code); // e.g. "PROVIDER_FETCH_FAILED"
     console.error(err.provider); // e.g. "github"
-    console.error(err.cause);    // underlying error, if any
+    console.error(err.cause); // underlying error, if any
   }
 }
 ```
 
 ### Error codes
 
-| Code | When thrown |
-|------|-------------|
-| `PROVIDER_NOT_CONFIGURED` | `authenticate()` / `getRedirectUrl()` called for a provider not passed to `nica()` |
-| `INVALID_PROVIDER_CONFIG` | Required config field missing for a provider |
-| `PROVIDER_FETCH_FAILED` | HTTP error while fetching user profile from provider |
-| `TOKEN_EXCHANGE_FAILED` | HTTP error while exchanging authorization code for tokens |
-| `INVALID_SESSION_CONFIG` | Invalid session config (via `nica-next`) |
+| Code                      | When thrown                                                                              |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| `PROVIDER_NOT_CONFIGURED` | `authenticate()` / `getRedirectUrl()` called for a provider not passed to `createNica()` |
+| `INVALID_PROVIDER_CONFIG` | Required config field missing for a provider                                             |
+| `PROVIDER_FETCH_FAILED`   | HTTP error while fetching user profile from provider                                     |
+| `TOKEN_EXCHANGE_FAILED`   | HTTP error while exchanging authorization code for tokens                                |
+| `INVALID_SESSION_CONFIG`  | Invalid session config (via `nica-next`)                                                 |
 
 ## Custom Providers
 

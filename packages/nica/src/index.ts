@@ -6,21 +6,24 @@ import { NicaError, NicaErrorCode } from "./errors";
 import { PROVIDERS } from "./providers";
 import { AuthCallback, AuthTokens, CreateAuthParams, ProviderConfig } from "./types";
 
-type ResolvedProviderConfig = Required<Pick<ProviderConfig,
-  | "clientId"
-  | "clientSecret"
-  | "redirectUri"
-  | "scopes"
-  | "authorizationUrl"
-  | "tokenUrl"
-  | "normalizeProfile"
-  | "normalizeTokens"
-  | "exchangeCodeForTokens"
-  | "fetchProfile"
-  | "getAuthUrl"
->>;
+type ResolvedProviderConfig = Required<
+  Pick<
+    ProviderConfig,
+    | "clientId"
+    | "clientSecret"
+    | "redirectUri"
+    | "scopes"
+    | "authorizationUrl"
+    | "tokenUrl"
+    | "normalizeProfile"
+    | "normalizeTokens"
+    | "exchangeCodeForTokens"
+    | "fetchProfile"
+    | "getAuthUrl"
+  >
+>;
 
-export function nica({ providers }: CreateAuthParams) {
+export function createNica({ providers }: CreateAuthParams) {
   const p: Partial<Record<string, ResolvedProviderConfig>> = {};
 
   for (const [name, config] of Object.entries(providers)) {
@@ -29,31 +32,37 @@ export function nica({ providers }: CreateAuthParams) {
     const clientId = config.clientId;
     const clientSecret = config.clientSecret;
 
-    if (!clientId || !clientSecret) throw new NicaError(`Missing clientId or clientSecret for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
+    if (!clientId || !clientSecret)
+      throw new NicaError(`Missing clientId or clientSecret for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const redirectUri = config.redirectUri;
-    if (!redirectUri) throw new NicaError(`Missing redirectUri for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
+    if (!redirectUri)
+      throw new NicaError(`Missing redirectUri for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const scopes = config.scopes || PROVIDER?.scopes;
     if (!scopes) throw new NicaError(`Missing scopes for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const authorizationUrl = config.authorizationUrl || PROVIDER?.authorizationUrl;
-    if (!authorizationUrl) throw new NicaError(`Missing authorizationUrl for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
+    if (!authorizationUrl)
+      throw new NicaError(`Missing authorizationUrl for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const tokenUrl = config.tokenUrl || PROVIDER?.tokenUrl;
     if (!tokenUrl) throw new NicaError(`Missing tokenUrl for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const normalizeProfile = config.normalizeProfile || PROVIDER?.normalizeProfile;
-    if (!normalizeProfile) throw new NicaError(`Missing normalizeProfile for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
+    if (!normalizeProfile)
+      throw new NicaError(`Missing normalizeProfile for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const normalizeTokens = config.normalizeTokens || PROVIDER?.normalizeTokens;
-    if (!normalizeTokens) throw new NicaError(`Missing normalizeTokens for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
+    if (!normalizeTokens)
+      throw new NicaError(`Missing normalizeTokens for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const exchangeCodeForTokens =
       config.exchangeCodeForTokens || createExchangeCodeForTokensFunction({ tokenUrl, clientId, clientSecret, redirectUri });
 
     const fetchProfile = config.fetchProfile || PROVIDER?.fetchProfile;
-    if (!fetchProfile) throw new NicaError(`Missing fetchProfile for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
+    if (!fetchProfile)
+      throw new NicaError(`Missing fetchProfile for provider: ${name}`, { code: NicaErrorCode.INVALID_PROVIDER_CONFIG, provider: name });
 
     const pkce = config.pkce !== false;
     const getAuthUrl = config.getAuthUrl || createGetAuthUrlFunction({ authorizationUrl, clientId, redirectUri, scopes, pkce });
@@ -101,4 +110,6 @@ export function nica({ providers }: CreateAuthParams) {
   return { providers: Object.keys(p), getRedirectUrl, exchangeCode, authenticate };
 }
 
-export default nica;
+export type NicaInstance = ReturnType<typeof createNica>;
+
+export default createNica;
