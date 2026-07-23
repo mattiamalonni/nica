@@ -68,7 +68,7 @@ if (!data) redirect("/login");
 
 **React session — setup:**
 
-`createNicaNext()` is server-safe and can be imported from Server Components. `useSession` lives in a separate client-only entry so it never leaks into the server bundle.
+`createNicaNext()` is server-safe and can be imported from Server Components. `useNica` lives in a separate client-only entry so it never leaks into the server bundle.
 
 ```typescript
 // lib/auth.ts  (server-safe — import freely from Server Components)
@@ -96,15 +96,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-**Use `useSession` in any Client Component:**
+**Use `useNica` in any Client Component:**
 
 ```typescript
 "use client";
 
-import { useSession } from "nica-next/client";
+import { useNica } from "nica-next/client";
 
 export function Profile() {
-  const { session } = useSession<{ userId: string }>();
+  const { session } = useNica<{ userId: string }>();
   if (!session) return <p>Not authenticated</p>;
   return <p>Welcome {session.userId}</p>;
 }

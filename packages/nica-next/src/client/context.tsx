@@ -18,12 +18,12 @@ export function SessionContextProvider({ value, children }: { value: SessionCont
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
-export function useSession<T extends object = Record<string, unknown>>(): {
+export function useNica<T extends object = Record<string, unknown>>(): {
   session: SessionPayload<T> | undefined;
 } {
   const value = useContext(SessionContext);
   if (value === NO_PROVIDER) {
-    throw new Error("[nica-next] useSession() must be called inside <SessionProvider>. Add <SessionProvider> to your root layout.");
+    throw new Error("[nica-next] useNica() must be called inside <SessionProvider>. Add <SessionProvider> to your root layout.");
   }
   return {
     session: value.data as SessionPayload<T> | undefined,
